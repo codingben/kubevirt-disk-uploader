@@ -1,0 +1,48 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kubevirt-disk-uploader
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: kubevirt-disk-uploader
+rules:
+- apiGroups: ["export.kubevirt.io"]
+  resources: ["virtualmachineexports"]
+  verbs: ["*"] # TODO: Remove wildcard
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["*"] # TODO: Remove wildcard
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: kubevirt-disk-uploader
+subjects:
+- kind: ServiceAccount
+  name: kubevirt-disk-uploader
+roleRef:
+  kind: Role
+  name: kubevirt-disk-uploader
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kubevirt-disk-uploader
+spec:
+  serviceAccountName: kubevirt-disk-uploader
+  containers:
+    - name: kubevirt-disk-uploader
+      image: quay.io/boukhano/kubevirt-disk-uploader:latest
+      imagePullPolicy: Always
+      env:
+        - name: QUAY_USERNAME
+          value: "boukhano" # TODO: Use as secret from secrets
+        - name: QUAY_PASSWORD
+          value: "value" # TODO: Use as secret from secrets
+      command: ["/usr/bin/kubevirt-disk-uploader.sh"]
+      args: ["example-vm"] # TODO: Name of the Virtual Machine not here
+  restartPolicy: Never
