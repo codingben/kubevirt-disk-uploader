@@ -1,10 +1,10 @@
 # KubeVirt Disk Uploader
 
-Extracts disk and uploads it to container registry.
+Extracts disk and uploads it to a container registry.
 
 ## About
 
-A tool designed to automate the extraction of disks from KubeVirt Virtual Machines, package them into Docker images, and upload them to the container registry.
+A tool designed to automate the extraction of disks from KubeVirt Virtual Machines, package them into [Docker images](https://kubevirt.io/user-guide/virtual_machines/disks_and_volumes/#containerdisk), and upload them to the container registry.
 
 ## Workflow
 
@@ -12,7 +12,7 @@ KubeVirt Disk Uploader -> KubeVirt VM Export -> VM Export Proxy & Server -> Down
 
 ## Installation
 
-This pod below will create a new KubeVirt VM Export object which starts a new `virt-exportserver` container, by running `virtctl vmexport ...` to download the disk image from the desired Virtual Machine. Once downloaded, exported disk image will be copied to a new container image that is uploaded to the container registry.
+This pod below will create a new KubeVirt VM Export object which start a new `virt-exportserver` container, by running `virtctl vmexport ...` to download the disk image from the desired Virtual Machine. Once downloaded, the exported disk image will be copied to a new container image that is uploaded to the container registry.
 
 ```
 kubectl apply -f kubevirt-disk-uploader.yaml
