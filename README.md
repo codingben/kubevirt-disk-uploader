@@ -18,6 +18,8 @@ This pod below will create a new KubeVirt VM Export object which starts a new `v
 kubectl apply -f kubevirt-disk-uploader.yaml
 ```
 
+**Note**: A Virtual Machine can only be exported when it is powered off.
+
 ## Example
 
 1. Enable VMExport:
@@ -38,7 +40,41 @@ kubectl apply -f examples/example-vm.yaml
 kubectl apply -f kubevirt-disk-uploader.yaml
 ```
 
-**Note**: A Virtual Machine can only be exported when it is powered off.
+4. See the logs of KubeVirt Disk Uploader:
+
+```
+kubectl logs kubevirt-disk-uploader         
+Applying VirutalMachineExport object to expose Virutal Machine data...
+virtualmachineexport.export.kubevirt.io/example-vm-vmexport created
+Downloading disk image from example-vm virutal machine...
+waiting for VM Export example-vm-vmexport status to be ready...
+Downloading file: 126.46 KiB [==>________________]
+...
+Download finished succesfully
+VirtualMachineExport 'ben-dev/example-vm-vmexport' deleted succesfully
+-rw-r--r--. 1 root root 730270529 Sep  6 14:34 tmp/disk.img
+Building exported disk image in a new example-vm-disk container image...
+STEP 1/2: FROM scratch
+STEP 2/2: ADD --chown=107:107 ./disk.img /disk/
+COMMIT boukhano/example-vm-disk:latest
+Getting image source signatures
+Copying ...
+Writing manifest to image destination
+--> ...
+Successfully tagged localhost/boukhano/example-vm-disk:latest
+Pushing the new container image to Quay registry...
+Login Succeeded!
+Getting image source signatures
+Copying ...
+Writing manifest to image destination
+Succesfully extracted disk image and uploaded it in a new container image to Quay registry.
+```
+
+5. Run the new container disk in a new Virtual Machine:
+
+```
+kubectl apply -f examples/exported-vm.yaml
+```
 
 ## Official Documentation
 
