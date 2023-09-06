@@ -26,21 +26,21 @@ function download_disk_img() {
 }
 
 function build_disk_img() {
-  echo "Building exported disk image in a new $vm_name-exported-disk container image..."
+  echo "Building exported disk image in a new $vm_name-disk container image..."
 
   cat << END > tmp/Dockerfile
 FROM scratch
 ADD --chown=107:107 ./disk.img /disk/
 END
-  buildah build -t boukhano/$vm_name-exported-disk:latest ./tmp
+  buildah build -t $vm_name-disk:latest ./tmp
 }
 
 function push_disk_img() {
   echo "Pushing the new container image to Quay registry..."
 
-  buildah login --username ${QUAY_USERNAME} --password ${QUAY_PASSWORD}
-  buildah tag boukhano/$vm_name-exported-disk:latest quay.io/boukhano/$vm_name-exported-disk:latest
-  buildah push quay.io/boukhano/$vm_name-exported-disk:latest
+  buildah login --username ${QUAY_USERNAME} --password ${QUAY_PASSWORD} "quay.io"
+  buildah tag $vm_name-disk:latest quay.io/boukhano/$vm_name-disk:latest
+  buildah push quay.io/boukhano/$vm_name-disk:latest
 }
 
 apply_vmexport
