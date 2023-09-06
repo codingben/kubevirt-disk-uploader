@@ -38,7 +38,7 @@ END
 function push_disk_img() {
   echo "Pushing the new container image to Quay registry..."
 
-  buildah login --username ${QUAY_USERNAME} --password ${QUAY_PASSWORD} "quay.io"
+  buildah login --username ${QUAY_USERNAME} --password ${QUAY_PASSWORD} ${QUAY_URL}
   buildah tag $vm_name-disk:latest quay.io/boukhano/$vm_name-disk:latest
   buildah push quay.io/boukhano/$vm_name-disk:latest
 }

@@ -43,6 +43,8 @@ spec:
           value: "boukhano" # TODO: Use as secret from secrets
         - name: QUAY_PASSWORD
           value: "value" # TODO: Use as secret from secrets
+        - name: QUAY_URL
+          value: "quay.io" # TODO: Use as secret from secrets
       command: ["/usr/bin/kubevirt-disk-uploader.sh"]
       args: ["example-vm"] # TODO: Name of the Virtual Machine not here
       securityContext:
