@@ -45,4 +45,9 @@ spec:
           value: "value" # TODO: Use as secret from secrets
       command: ["/usr/bin/kubevirt-disk-uploader.sh"]
       args: ["example-vm"] # TODO: Name of the Virtual Machine not here
+      securityContext:
+        capabilities:
+          add:
+            - "SETFCAP"
+        privileged: true # TODO: Needed by buildah, work to remove it
   restartPolicy: Never
