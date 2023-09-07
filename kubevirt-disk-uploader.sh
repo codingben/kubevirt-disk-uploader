@@ -2,22 +2,6 @@
 
 vm_name=$1
 
-function apply_vmexport() {
-  echo "Applying VirutalMachineExport object to expose Virutal Machine data..."
-
-	cat << END | kubectl apply -f -
-apiVersion: export.kubevirt.io/v1alpha1
-kind: VirtualMachineExport
-metadata:
-  name: $vm_name-vmexport
-spec:
-  source:
-    apiGroup: "kubevirt.io"
-    kind: VirtualMachine
-    name: $vm_name
-END
-}
-
 function download_disk_img() {
   echo "Downloading disk image from $vm_name virutal machine..."
 
@@ -43,7 +27,6 @@ function push_disk_img() {
   buildah push quay.io/boukhano/$vm_name-disk:latest
 }
 
-apply_vmexport
 download_disk_img
 build_disk_img
 push_disk_img
