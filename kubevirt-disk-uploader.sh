@@ -5,8 +5,16 @@ vm_name=$1
 function download_disk_img() {
   echo "Downloading disk image from $vm_name virutal machine..."
 
-  usr/bin/virtctl vmexport download $vm_name-vmexport --vm=$vm_name --output=tmp/disk.img
-  ls -l tmp/disk.img
+  usr/bin/virtctl vmexport download $vm_name-vmexport --vm=$vm_name --output=tmp/disk.img.gz
+  ls -l tmp/disk.img.gz
+}
+
+function convert_disk_img() {
+  echo "Converting disk image to qcow2..."
+
+  gunzip tmp/disk.img.gz
+  qemu-img convert -f raw -O qcow2 tmp/disk.img tmp/disk.qcow2
+  rm tmp/disk.img
 }
 
 function build_disk_img() {
@@ -14,7 +22,7 @@ function build_disk_img() {
 
   cat << END > tmp/Dockerfile
 FROM scratch
-ADD --chown=107:107 ./disk.img /disk/
+ADD --chown=107:107 ./disk.qcow2 /disk/
 END
   buildah build -t $vm_name-disk:latest ./tmp
 }
@@ -28,6 +36,7 @@ function push_disk_img() {
 }
 
 download_disk_img
+convert_disk_img
 build_disk_img
 push_disk_img
 
