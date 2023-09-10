@@ -5,7 +5,6 @@ metadata:
     kubevirt.io/vm: vm-example-datavolume
   name: example-vm
 spec:
-  runStrategy: Always
   dataVolumeTemplates:
   - metadata:
       creationTimestamp: null
