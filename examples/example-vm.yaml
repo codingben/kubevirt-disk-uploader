@@ -16,7 +16,6 @@ spec:
         resources:
           requests:
             storage: 10Gi
-        storageClassName: crc-csi-hostpath-provisioner # TODO: Change it to local
       source:
         registry:
           url: docker://quay.io/boukhano/fedora38:latest # TODO: Use docker://quay.io/containerdisks/fedora:38
