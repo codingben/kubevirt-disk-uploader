@@ -9,7 +9,7 @@ function apply_vmexport() {
 apiVersion: export.kubevirt.io/v1alpha1
 kind: VirtualMachineExport
 metadata:
-  name: $vm_name-vmexport
+  name: $vm_name
 spec:
   source:
     apiGroup: "kubevirt.io"
@@ -21,8 +21,16 @@ END
 function download_disk_img() {
   echo "Downloading disk image from $vm_name virutal machine..."
 
-  usr/bin/virtctl vmexport download $vm_name-vmexport --vm=$vm_name --output=tmp/disk.img.gz
-  ls -l tmp/disk.img.gz
+  file="tmp/disk.img.gz"
+
+  usr/bin/virtctl vmexport download $vm_name --vm=$vm_name --output=$file
+
+  if [ -e "$file" ] && [ -s "$file" ]; then
+      echo "Donwload completed successfully."
+  else
+      echo "Download failed."
+      exit 1
+  fi
 }
 
 function convert_disk_img() {
