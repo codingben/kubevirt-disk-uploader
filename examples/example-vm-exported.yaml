@@ -2,7 +2,7 @@ apiVersion: kubevirt.io/v1
 kind: VirtualMachine
 metadata:
   creationTimestamp: null
-  name: exported-vm
+  name: example-vm-exported
 spec:
   runStrategy: Always
   template:
@@ -30,5 +30,5 @@ spec:
       terminationGracePeriodSeconds: 180
       volumes:
       - containerDisk:
-          image: quay.io/boukhano/example-vm-disk:latest
+          image: quay.io/boukhano/example-vm-exported:latest
         name: containerdisk
