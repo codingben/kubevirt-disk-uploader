@@ -14,19 +14,19 @@ function apply_vmexport() {
 apiVersion: export.kubevirt.io/v1alpha1
 kind: VirtualMachineExport
 metadata:
-  name: $$VM_NAME
+  name: $VM_NAME
 spec:
   source:
     apiGroup: "kubevirt.io"
     kind: VirtualMachine
-    name: $$VM_NAME
+    name: $VM_NAME
 END
 }
 
 function download_disk_img() {
-  echo "Downloading disk image $DISK_FILE from $$VM_NAME Virutal Machine..."
+  echo "Downloading disk image $DISK_FILE from $VM_NAME Virutal Machine..."
 
-  usr/bin/virtctl vmexport download $$VM_NAME --vm=$$VM_NAME --output=$TEMP_DISK_PATH
+  usr/bin/virtctl vmexport download $VM_NAME --vm=$VM_NAME --output=$TEMP_DISK_PATH
 
   if [ -e "$TEMP_DISK_PATH" ] && [ -s "$TEMP_DISK_PATH" ]; then
       echo "Donwload completed successfully."
