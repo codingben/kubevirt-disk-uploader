@@ -2,6 +2,8 @@
 
 vm_name=$1
 container_disk_name=$2
+disk_file=$3
+disk_path=tmp/$3
 
 function apply_vmexport() {
   echo "Applying VirutalMachineExport object to expose Virutal Machine data..."
@@ -20,13 +22,11 @@ END
 }
 
 function download_disk_img() {
-  echo "Downloading disk image from $vm_name virutal machine..."
+  echo "Downloading disk image $disk_file from $vm_name Virutal Machine..."
 
-  file="tmp/disk.img.gz"
+  usr/bin/virtctl vmexport download $vm_name --vm=$vm_name --output=$disk_path
 
-  usr/bin/virtctl vmexport download $vm_name --vm=$vm_name --output=$file
-
-  if [ -e "$file" ] && [ -s "$file" ]; then
+  if [ -e "$disk_path" ] && [ -s "$disk_path" ]; then
       echo "Donwload completed successfully."
   else
       echo "Download failed."
@@ -35,11 +35,11 @@ function download_disk_img() {
 }
 
 function convert_disk_img() {
-  echo "Converting disk image to qcow2..."
+  echo "Converting raw disk image to qcow2 format..."
 
-  gunzip tmp/disk.img.gz
-  qemu-img convert -f raw -O qcow2 tmp/disk.img tmp/disk.qcow2
-  rm tmp/disk.img
+  gunzip $disk_path
+  qemu-img convert -f raw -O qcow2 $disk_path tmp/disk.qcow2
+  rm $disk_path
 }
 
 function build_disk_img() {
@@ -53,7 +53,7 @@ END
 }
 
 function push_disk_img() {
-  echo "Pushing the new container image to Quay registry..."
+  echo "Pushing the new container image to container registry..."
 
   buildah login --username ${REGISTRY_USERNAME} --password ${REGISTRY_PASSWORD} ${REGISTRY_HOST}
   buildah tag $container_disk_name ${REGISTRY_HOST}/${REGISTRY_USERNAME}/$container_disk_name
@@ -66,4 +66,4 @@ convert_disk_img
 build_disk_img
 push_disk_img
 
-echo "Succesfully extracted disk image and uploaded it in a new container image to Quay registry."
+echo "Succesfully extracted disk image and uploaded it in a new container image to container registry."
