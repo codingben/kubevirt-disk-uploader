@@ -1,6 +1,7 @@
 #!/bin/bash
 
 vm_name=$1
+container_disk_name=$2
 
 function apply_vmexport() {
   echo "Applying VirutalMachineExport object to expose Virutal Machine data..."
@@ -42,21 +43,21 @@ function convert_disk_img() {
 }
 
 function build_disk_img() {
-  echo "Building exported disk image in a new $vm_name-exported container image..."
+  echo "Building exported disk image in a new container image..."
 
   cat << END > tmp/Dockerfile
 FROM scratch
 ADD --chown=107:107 ./disk.qcow2 /disk/
 END
-  buildah build -t $vm_name-exported:latest ./tmp
+  buildah build -t $container_disk_name ./tmp
 }
 
 function push_disk_img() {
   echo "Pushing the new container image to Quay registry..."
 
   buildah login --username ${REGISTRY_USERNAME} --password ${REGISTRY_PASSWORD} ${REGISTRY_HOST}
-  buildah tag $vm_name-exported:latest ${REGISTRY_HOST}/${REGISTRY_USERNAME}/$vm_name-exported:latest
-  buildah push ${REGISTRY_HOST}/${REGISTRY_USERNAME}/$vm_name-exported:latest
+  buildah tag $container_disk_name ${REGISTRY_HOST}/${REGISTRY_USERNAME}/$container_disk_name
+  buildah push ${REGISTRY_HOST}/${REGISTRY_USERNAME}/$container_disk_name
 }
 
 apply_vmexport

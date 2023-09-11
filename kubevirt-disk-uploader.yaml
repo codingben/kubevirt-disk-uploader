@@ -46,7 +46,7 @@ spec:
         - name: REGISTRY_HOST
           value: "quay.io"
       command: ["/usr/bin/kubevirt-disk-uploader.sh"]
-      args: ["example-vm"]
+      args: ["example-vm", "example-vm-exported:latest"]
       securityContext:
         capabilities:
           add:
