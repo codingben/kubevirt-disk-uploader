@@ -1,9 +1,10 @@
 #!/bin/bash
 
-vm_name=$1
-container_disk_name=$2
-disk_file=$3
-disk_path=tmp/$3
+VM_NAME=$1
+CONTAINER_DISK_NAME=$2
+DISK_FILE=$3
+TEMP_DISK_PATH=tmp/$3
+REGISTRY_URL=${REGISTRY_HOST}/${REGISTRY_USERNAME}/$CONTAINER_DISK_NAME
 
 function apply_vmexport() {
   echo "Applying VirutalMachineExport object to expose Virutal Machine data..."
@@ -12,21 +13,21 @@ function apply_vmexport() {
 apiVersion: export.kubevirt.io/v1alpha1
 kind: VirtualMachineExport
 metadata:
-  name: $vm_name
+  name: $$VM_NAME
 spec:
   source:
     apiGroup: "kubevirt.io"
     kind: VirtualMachine
-    name: $vm_name
+    name: $$VM_NAME
 END
 }
 
 function download_disk_img() {
-  echo "Downloading disk image $disk_file from $vm_name Virutal Machine..."
+  echo "Downloading disk image $DISK_FILE from $$VM_NAME Virutal Machine..."
 
-  usr/bin/virtctl vmexport download $vm_name --vm=$vm_name --output=$disk_path
+  usr/bin/virtctl vmexport download $$VM_NAME --vm=$$VM_NAME --output=$TEMP_DISK_PATH
 
-  if [ -e "$disk_path" ] && [ -s "$disk_path" ]; then
+  if [ -e "$TEMP_DISK_PATH" ] && [ -s "$TEMP_DISK_PATH" ]; then
       echo "Donwload completed successfully."
   else
       echo "Download failed."
@@ -37,9 +38,9 @@ function download_disk_img() {
 function convert_disk_img() {
   echo "Converting raw disk image to qcow2 format..."
 
-  gunzip $disk_path
-  qemu-img convert -f raw -O qcow2 $disk_path tmp/disk.qcow2
-  rm $disk_path
+  gunzip $TEMP_DISK_PATH
+  qemu-img convert -f raw -O qcow2 $TEMP_DISK_PATH tmp/disk.qcow2
+  rm $TEMP_DISK_PATH
 }
 
 function build_disk_img() {
@@ -49,15 +50,15 @@ function build_disk_img() {
 FROM scratch
 ADD --chown=107:107 ./disk.qcow2 /disk/
 END
-  buildah build -t $container_disk_name ./tmp
+  buildah build -t $CONTAINER_DISK_NAME ./tmp
 }
 
 function push_disk_img() {
   echo "Pushing the new container image to container registry..."
 
   buildah login --username ${REGISTRY_USERNAME} --password ${REGISTRY_PASSWORD} ${REGISTRY_HOST}
-  buildah tag $container_disk_name ${REGISTRY_HOST}/${REGISTRY_USERNAME}/$container_disk_name
-  buildah push ${REGISTRY_HOST}/${REGISTRY_USERNAME}/$container_disk_name
+  buildah tag $CONTAINER_DISK_NAME $REGISTRY_URL
+  buildah push $REGISTRY_URL
 }
 
 apply_vmexport
