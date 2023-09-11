@@ -55,8 +55,8 @@ function push_disk_img() {
   echo "Pushing the new container image to Quay registry..."
 
   buildah login --username ${REGISTRY_USERNAME} --password ${REGISTRY_PASSWORD} ${REGISTRY_HOST}
-  buildah tag $vm_name-exported:latest quay.io/boukhano/$vm_name-exported:latest
-  buildah push quay.io/boukhano/$vm_name-exported:latest
+  buildah tag $vm_name-exported:latest ${REGISTRY_HOST}/${REGISTRY_USERNAME}/$vm_name-exported:latest
+  buildah push ${REGISTRY_HOST}/${REGISTRY_USERNAME}/$vm_name-exported:latest
 }
 
 apply_vmexport
