@@ -18,7 +18,7 @@ spec:
             storage: 10Gi
       source:
         registry:
-          url: docker://quay.io/boukhano/fedora38:latest # TODO: Use docker://quay.io/containerdisks/fedora:38
+          url: docker://quay.io/containerdisks/fedora:38
   running: false
   template:
     metadata:
