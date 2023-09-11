@@ -39,11 +39,11 @@ spec:
       image: quay.io/boukhano/kubevirt-disk-uploader:latest
       imagePullPolicy: Always
       env:
-        - name: QUAY_USERNAME
+        - name: REGISTRY_USERNAME
           value: "boukhano"
-        - name: QUAY_PASSWORD
+        - name: REGISTRY_PASSWORD
           value: "value"
-        - name: QUAY_URL
+        - name: REGISTRY_HOST
           value: "quay.io"
       command: ["/usr/bin/kubevirt-disk-uploader.sh"]
       args: ["example-vm"]
