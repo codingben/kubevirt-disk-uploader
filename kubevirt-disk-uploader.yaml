@@ -11,10 +11,10 @@ metadata:
 rules:
 - apiGroups: ["export.kubevirt.io"]
   resources: ["virtualmachineexports"]
-  verbs: ["*"] # TODO: Remove wildcard
+  verbs: ["*"]
 - apiGroups: [""]
   resources: ["secrets"]
-  verbs: ["*"] # TODO: Remove wildcard
+  verbs: ["*"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -40,16 +40,16 @@ spec:
       imagePullPolicy: Always
       env:
         - name: QUAY_USERNAME
-          value: "boukhano" # TODO: Use as secret from secrets
+          value: "boukhano"
         - name: QUAY_PASSWORD
-          value: "value" # TODO: Use as secret from secrets
+          value: "value"
         - name: QUAY_URL
-          value: "quay.io" # TODO: Use as secret from secrets
+          value: "quay.io"
       command: ["/usr/bin/kubevirt-disk-uploader.sh"]
-      args: ["example-vm"] # TODO: Name of the Virtual Machine not here
+      args: ["example-vm"]
       securityContext:
         capabilities:
           add:
             - "SETFCAP"
-        privileged: true # TODO: Needed by buildah, work to remove it
+        privileged: true
   restartPolicy: Never
