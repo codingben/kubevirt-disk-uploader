@@ -49,16 +49,16 @@ waiting for VM Export example-vm-vmexport status to be ready...
 Downloading file: 126.46 KiB [==>________________]
 ...
 VirtualMachineExport 'ben-dev/example-vm-vmexport' deleted succesfully
--rw-r--r--. 1 root root 730270529 Sep  7 12:57 tmp/disk.img.gz
+Donwload completed successfully.
 Converting disk image to qcow2...
-Building exported disk image in a new example-vm-disk container image...
+Building exported disk image in a new example-vm-exported container image...
 STEP 1/2: FROM scratch
 STEP 2/2: ADD --chown=107:107 ./disk.qcow2 /disk/
-COMMIT example-vm-disk:latest
+COMMIT example-vm-exported:latest
 Getting image source signatures
 Copying ..,
 Writing manifest to image destination
-Successfully tagged localhost/example-vm-disk:latest
+Successfully tagged localhost/example-vm-exported:latest
 Pushing the new container image to Quay registry...
 Login Succeeded!
 Getting image source signatures
@@ -70,7 +70,7 @@ Succesfully extracted disk image and uploaded it in a new container image to Qua
 5. Run the new container disk in a new Virtual Machine:
 
 ```
-kubectl apply -f examples/exported-vm.yaml
+kubectl apply -f examples/example-vm-exported.yaml
 ```
 
 ## KubeVirt Documentation
