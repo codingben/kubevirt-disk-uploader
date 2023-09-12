@@ -5,6 +5,8 @@ CONTAINER_DISK_NAME=$2
 DISK_FILE=$3
 OUTPUT_PATH=./tmp
 TEMP_DISK_PATH=$OUTPUT_PATH/$DISK_FILE
+CONVERTED_DISK_PATH=$OUTPUT_PATH/disk.qcow2
+DOCKERFILE_PATH=$OUTPUT_PATH/Dockerfile
 REGISTRY_URL=${REGISTRY_HOST}/${REGISTRY_USERNAME}/$CONTAINER_DISK_NAME
 
 function apply_vmexport() {
@@ -40,14 +42,18 @@ function convert_disk_img() {
   echo "Converting raw disk image to qcow2 format..."
 
   gunzip $TEMP_DISK_PATH
-  qemu-img convert -f raw -O qcow2 $TEMP_DISK_PATH $OUTPUT_PATH/disk.qcow2
-  rm $TEMP_DISK_PATH
+  qemu-img convert -f raw -O qcow2 ${TEMP_DISK_PATH%.gz} $CONVERTED_DISK_PATH
+
+  if [ ! -e $CONVERTED_DISK_PATH ] || [ ! -s $CONVERTED_DISK_PATH ]; then
+    echo "Downloaded disk was not converted into qcow2 format."
+    exit 1
+  fi
 }
 
 function build_disk_img() {
   echo "Building exported disk image in a new container image..."
 
-  cat << END > $OUTPUT_PATH/Dockerfile
+  cat << END > $DOCKERFILE_PATH
 FROM scratch
 ADD --chown=107:107 ./disk.qcow2 /disk/
 END
