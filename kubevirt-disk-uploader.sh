@@ -9,6 +9,23 @@ CONVERTED_DISK_PATH=$OUTPUT_PATH/disk.qcow2
 DOCKERFILE_PATH=$OUTPUT_PATH/Dockerfile
 REGISTRY_URL=${REGISTRY_HOST}/${REGISTRY_USERNAME}/$CONTAINER_DISK_NAME
 
+function validate_arguments() {
+  if [ -z "$VM_NAME" ]; then
+    echo "Virtual Machine name is missing. Please provide a valid VM name."
+    exit 1
+  fi
+
+  if [ -z "$CONTAINER_DISK_NAME" ]; then
+    echo "Container Disk name is missing. Please provide a valid disk name."
+    exit 1
+  fi
+
+  if [ -z "$DISK_FILE" ]; then
+    echo "Disk file to extract is missing. Please provide a valid disk file."
+    exit 1
+  fi
+}
+
 function apply_vmexport() {
   echo "Applying VirutalMachineExport object to expose Virutal Machine data..."
 
@@ -68,6 +85,7 @@ function push_disk_img() {
   buildah push $REGISTRY_URL
 }
 
+validate_arguments
 apply_vmexport
 download_disk_img
 convert_disk_img
