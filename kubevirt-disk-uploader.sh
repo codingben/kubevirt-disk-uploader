@@ -58,7 +58,7 @@ function download_disk_img() {
 function convert_disk_img() {
   echo "Converting raw disk image to qcow2 format..."
 
-  gunzip $TEMP_DISK_PATH
+  zcat $TEMP_DISK_PATH | dd conv=sparse of=${TEMP_DISK_PATH%.gz}
   qemu-img convert -f raw -O qcow2 ${TEMP_DISK_PATH%.gz} $CONVERTED_DISK_PATH
 
   if [ ! -e $CONVERTED_DISK_PATH ] || [ ! -s $CONVERTED_DISK_PATH ]; then

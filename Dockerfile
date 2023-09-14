@@ -5,7 +5,7 @@ RUN cd /usr/bin && \
 	chmod +x virtctl && \
 	curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \
 	chmod +x kubectl
-RUN dnf install -y buildah gzip qemu-img && \
+RUN dnf install -y buildah qemu-img && \
 	dnf clean all -y
 
 COPY kubevirt-disk-uploader.sh /usr/bin/kubevirt-disk-uploader.sh
