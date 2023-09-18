@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 VM_NAME=$1
 CONTAINER_DISK_NAME=$2
