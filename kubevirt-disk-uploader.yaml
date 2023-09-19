@@ -40,11 +40,20 @@ spec:
       imagePullPolicy: Always
       env:
         - name: REGISTRY_USERNAME
-          value: "boukhano"
+          valueFrom:
+            secretKeyRef:
+              name: kubevirt-disk-uploader-credentials
+              key: registryUsername
         - name: REGISTRY_PASSWORD
-          value: "value"
+          valueFrom:
+            secretKeyRef:
+              name: kubevirt-disk-uploader-credentials
+              key: registryPassword
         - name: REGISTRY_HOST
-          value: "quay.io"
+          valueFrom:
+            secretKeyRef:
+              name: kubevirt-disk-uploader-credentials
+              key: registryHostname
       command: ["/usr/bin/kubevirt-disk-uploader.sh"]
       args: ["example-vm", "example-vm-exported:latest", "disk.img.gz"]
       securityContext:
@@ -53,3 +62,13 @@ spec:
             - "SETFCAP"
         privileged: true
   restartPolicy: Never
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kubevirt-disk-uploader-credentials
+type: Opaque
+data:
+  registryUsername: USERNAME
+  registryPassword: PASSWORD
+  registryHostname: HOSTNAME
