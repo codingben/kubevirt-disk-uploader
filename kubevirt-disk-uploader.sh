@@ -85,11 +85,17 @@ function push_disk_img() {
   buildah push $REGISTRY_URL
 }
 
-validate_arguments
-apply_vmexport
-download_disk_img
-convert_disk_img
-build_disk_img
-push_disk_img
+function main() {
+  echo "Extracts disk and uploads it to a container registry..."
 
-echo "Succesfully extracted disk image and uploaded it in a new container image to container registry."
+  validate_arguments
+  apply_vmexport
+  download_disk_img
+  convert_disk_img
+  build_disk_img
+  push_disk_img
+
+  echo "Succesfully extracted disk image and uploaded it in a new container image to container registry."
+}
+
+main
