@@ -77,6 +77,16 @@ END
   buildah build -t $CONTAINER_DISK_NAME $OUTPUT_PATH
 }
 
+function validate_disk_img() {
+  echo "Validating the new container image size..."
+  
+  IMAGE_SIZE=$(buildah images --format '{{.Size}}' --noheading $CONTAINER_DISK_NAME)
+
+  # TODO: Check image size, if it's bigger than specified limit then exit program
+
+  echo "Container image size is ${IMAGE_SIZE}."
+}
+
 function push_disk_img() {
   echo "Pushing the new container image to container registry..."
 
@@ -93,6 +103,7 @@ function main() {
   download_disk_img
   convert_disk_img
   build_disk_img
+  validate_disk_img
   push_disk_img
 
   echo "Succesfully extracted disk image and uploaded it in a new container image to container registry."
