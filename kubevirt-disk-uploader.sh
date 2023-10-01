@@ -67,8 +67,8 @@ function convert_disk_img() {
   fi
 }
 
-function build_disk_img() {
-  echo "Building exported disk image in a new container image..."
+function build_container_img() {
+  echo "Building new container image with exported disk image..."
 
   cat << END > $DOCKERFILE_PATH
 FROM scratch
@@ -77,17 +77,15 @@ END
   buildah build -t $CONTAINER_DISK_NAME $OUTPUT_PATH
 }
 
-function validate_disk_img() {
-  echo "Validating the new container image size..."
+function check_container_img() {
+  echo "Checking container image size..."
   
   IMAGE_SIZE=$(buildah images --format '{{.Size}}' --noheading $CONTAINER_DISK_NAME)
-
-  # TODO: Check image size, if it's bigger than specified limit then exit program
 
   echo "Container image size is ${IMAGE_SIZE}."
 }
 
-function push_disk_img() {
+function push_container_img() {
   echo "Pushing the new container image to container registry..."
 
   buildah login --username ${REGISTRY_USERNAME} --password ${REGISTRY_PASSWORD} ${REGISTRY_HOST}
@@ -102,9 +100,9 @@ function main() {
   apply_vmexport
   download_disk_img
   convert_disk_img
-  build_disk_img
-  validate_disk_img
-  push_disk_img
+  build_container_img
+  check_container_img
+  push_container_img
 
   echo "Succesfully extracted disk image and uploaded it in a new container image to container registry."
 }
