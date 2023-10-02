@@ -1,13 +1,13 @@
 #!/bin/sh
 
+# Arguments
 VM_NAME=$1
 CONTAINER_DISK_NAME=$2
 DISK_FILE=$3
+
+# Variables
 OUTPUT_PATH=./tmp
 TEMP_DISK_PATH=$OUTPUT_PATH/$DISK_FILE
-CONVERTED_DISK_PATH=$OUTPUT_PATH/disk.qcow2
-DOCKERFILE_PATH=$OUTPUT_PATH/Dockerfile
-REGISTRY_URL=${REGISTRY_HOST}/${REGISTRY_USERNAME}/$CONTAINER_DISK_NAME
 
 function validate_arguments() {
   if [ -z "$VM_NAME" ]; then
@@ -58,6 +58,8 @@ function download_disk_img() {
 function convert_disk_img() {
   echo "Converting raw disk image to qcow2 format..."
 
+  CONVERTED_DISK_PATH=$OUTPUT_PATH/disk.qcow2
+
   zcat $TEMP_DISK_PATH | dd conv=sparse of=${TEMP_DISK_PATH%.gz}
   qemu-img convert -f raw -O qcow2 ${TEMP_DISK_PATH%.gz} $CONVERTED_DISK_PATH
 
@@ -69,6 +71,8 @@ function convert_disk_img() {
 
 function build_container_img() {
   echo "Building new container image with exported disk image..."
+
+  DOCKERFILE_PATH=$OUTPUT_PATH/Dockerfile
 
   cat << END > $DOCKERFILE_PATH
 FROM scratch
@@ -87,6 +91,8 @@ function check_container_img() {
 
 function push_container_img() {
   echo "Pushing the new container image to container registry..."
+
+  REGISTRY_URL=${REGISTRY_HOST}/${REGISTRY_USERNAME}/$CONTAINER_DISK_NAME
 
   buildah login --username ${REGISTRY_USERNAME} --password ${REGISTRY_PASSWORD} ${REGISTRY_HOST}
   buildah tag $CONTAINER_DISK_NAME $REGISTRY_URL
