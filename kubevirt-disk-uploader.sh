@@ -96,7 +96,7 @@ function push_container_img() {
     echo "External container registry was not specified. Pushing the container image to local container registry..."
 
     REGISTRY_HOST=$(oc registry info)
-    REGISTRY_PROJECT=$(oc project -q)
+    REGISTRY_PROJECT="default" # TODO: Fix return of $(oc project -q) ("error: no project has been set")
     REGISTRY_URL=$REGISTRY_HOST/$REGISTRY_PROJECT/$CONTAINER_DISK_NAME
     REGISTRY_USERNAME=$(oc whoami)
     REGISTRY_PASSWORD=$(oc whoami -t)
