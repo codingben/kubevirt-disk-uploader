@@ -92,11 +92,25 @@ function check_container_img() {
 function push_container_img() {
   echo "Pushing the new container image to container registry..."
 
-  REGISTRY_URL=${REGISTRY_HOST}/${REGISTRY_USERNAME}/$CONTAINER_DISK_NAME
+  if [ -z "$REGISTRY_HOST" ]; then
+    echo "External container registry was not specified. Pushing the container image to local container registry..."
 
-  buildah login --username ${REGISTRY_USERNAME} --password ${REGISTRY_PASSWORD} ${REGISTRY_HOST}
-  buildah tag $CONTAINER_DISK_NAME $REGISTRY_URL
-  buildah push $REGISTRY_URL
+    REGISTRY_HOST=$(oc registry info)
+    REGISTRY_PROJECT=$(oc project -q)
+    REGISTRY_URL=$REGISTRY_HOST/$REGISTRY_PROJECT/$CONTAINER_DISK_NAME
+    REGISTRY_USERNAME=$(oc whoami)
+    REGISTRY_PASSWORD=$(oc whoami -t)
+
+    buildah login --username $REGISTRY_USERNAME --password $REGISTRY_PASSWORD --tls-verify=false $REGISTRY_HOST
+    buildah tag $CONTAINER_DISK_NAME $REGISTRY_URL
+    buildah push --tls-verify=false $REGISTRY_URL
+  else
+    REGISTRY_URL=$REGISTRY_HOST/$REGISTRY_USERNAME/$CONTAINER_DISK_NAME
+
+    buildah login --username $REGISTRY_USERNAME --password $REGISTRY_PASSWORD $REGISTRY_HOST
+    buildah tag $CONTAINER_DISK_NAME $REGISTRY_URL
+    buildah push $REGISTRY_URL
+  fi
 }
 
 function main() {
