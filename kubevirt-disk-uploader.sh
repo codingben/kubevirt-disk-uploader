@@ -95,11 +95,13 @@ function push_container_img() {
   if [ -z "$REGISTRY_HOST" ]; then
     echo "External container registry was not specified. Pushing the container image to local container registry..."
 
+    SERVER_URL=$(oc whoami --show-server)
+
+    oc login $SERVER_URL --username $REGISTRY_USERNAME --password $REGISTRY_PASSWORD --insecure-skip-tls-verify
+    oc new-project $VM_NAME
+
     REGISTRY_HOST=$(oc registry info)
-    REGISTRY_PROJECT="default" # TODO: Fix return of $(oc project -q) ("error: no project has been set")
-    REGISTRY_URL=$REGISTRY_HOST/$REGISTRY_PROJECT/$CONTAINER_DISK_NAME
-    REGISTRY_USERNAME=$(oc whoami)
-    REGISTRY_PASSWORD=$(oc whoami -t)
+    REGISTRY_URL=$REGISTRY_HOST/$VM_NAME/$CONTAINER_DISK_NAME
 
     buildah login --username $REGISTRY_USERNAME --password $REGISTRY_PASSWORD --tls-verify=false $REGISTRY_HOST
     buildah tag $CONTAINER_DISK_NAME $REGISTRY_URL
