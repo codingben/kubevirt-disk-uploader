@@ -69,6 +69,6 @@ metadata:
   name: kubevirt-disk-uploader-credentials
 type: Opaque
 data:
-  registryUsername: USERNAME
-  registryPassword: PASSWORD
-  registryHostname: HOSTNAME
+  registryUsername: ""
+  registryPassword: ""
+  registryHostname: ""
