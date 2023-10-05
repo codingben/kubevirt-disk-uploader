@@ -9,7 +9,7 @@ DISK_FILE=$3
 OUTPUT_PATH=./tmp
 TEMP_DISK_PATH=$OUTPUT_PATH/$DISK_FILE
 
-function validate_arguments() {
+validate_arguments() {
   if [ -z "$VM_NAME" ]; then
     echo "Virtual Machine name is missing. Please provide a valid VM name."
     exit 1
@@ -26,7 +26,7 @@ function validate_arguments() {
   fi
 }
 
-function apply_vmexport() {
+apply_vmexport() {
   echo "Applying VirutalMachineExport object to expose Virutal Machine data..."
 
 	cat << END | kubectl apply -f -
@@ -42,10 +42,10 @@ spec:
 END
 }
 
-function download_disk_img() {
+download_disk_img() {
   echo "Downloading disk image $DISK_FILE from $VM_NAME Virutal Machine..."
 
-  usr/bin/virtctl vmexport download $VM_NAME --vm=$VM_NAME --output=$TEMP_DISK_PATH
+  usr/bin/virtctl vmexport download "$VM_NAME" --vm="$VM_NAME" --output="$TEMP_DISK_PATH"
 
   if [ -e "$TEMP_DISK_PATH" ] && [ -s "$TEMP_DISK_PATH" ]; then
       echo "Donwload completed successfully."
@@ -55,13 +55,13 @@ function download_disk_img() {
   fi
 }
 
-function convert_disk_img() {
+convert_disk_img() {
   echo "Converting raw disk image to qcow2 format..."
 
   CONVERTED_DISK_PATH=$OUTPUT_PATH/disk.qcow2
 
-  zcat $TEMP_DISK_PATH | dd conv=sparse of=${TEMP_DISK_PATH%.gz}
-  qemu-img convert -f raw -O qcow2 ${TEMP_DISK_PATH%.gz} $CONVERTED_DISK_PATH
+  zcat "$TEMP_DISK_PATH" | dd conv=sparse of="${TEMP_DISK_PATH%.gz}"
+  qemu-img convert -f raw -O qcow2 "${TEMP_DISK_PATH%.gz}" $CONVERTED_DISK_PATH
 
   if [ ! -e $CONVERTED_DISK_PATH ] || [ ! -s $CONVERTED_DISK_PATH ]; then
     echo "Downloaded disk was not converted into qcow2 format."
@@ -69,7 +69,7 @@ function convert_disk_img() {
   fi
 }
 
-function build_container_img() {
+build_container_img() {
   echo "Building new container image with exported disk image..."
 
   DOCKERFILE_PATH=$OUTPUT_PATH/Dockerfile
@@ -78,18 +78,18 @@ function build_container_img() {
 FROM scratch
 ADD --chown=107:107 ./disk.qcow2 /disk/
 END
-  buildah build -t $CONTAINER_DISK_NAME $OUTPUT_PATH
+  buildah build -t "$CONTAINER_DISK_NAME" $OUTPUT_PATH
 }
 
-function check_container_img() {
+check_container_img() {
   echo "Checking container image size..."
   
-  IMAGE_SIZE=$(buildah images --format '{{.Size}}' --noheading $CONTAINER_DISK_NAME)
+  IMAGE_SIZE=$(buildah images --format '{{.Size}}' --noheading "$CONTAINER_DISK_NAME")
 
   echo "Container image size is ${IMAGE_SIZE}."
 }
 
-function push_container_img() {
+push_container_img() {
   echo "Pushing the new container image to container registry..."
 
   if [ -z "$REGISTRY_HOST" ]; then
@@ -99,27 +99,27 @@ function push_container_img() {
     SERVER_USERNAME="developer"
     SERVER_PASSWORD="developer"
 
-    oc login $SERVER_URL --username $SERVER_USERNAME --password $SERVER_PASSWORD --insecure-skip-tls-verify
-    oc new-project $VM_NAME
+    oc login "$SERVER_URL" --username $SERVER_USERNAME --password $SERVER_PASSWORD --insecure-skip-tls-verify
+    oc new-project "$VM_NAME"
 
     REGISTRY_HOST=$(oc registry info)
     REGISTRY_URL=$REGISTRY_HOST/$VM_NAME/$CONTAINER_DISK_NAME
     REGISTRY_USERNAME=$(oc whoami)
     REGISTRY_PASSWORD=$(oc whoami -t)
 
-    buildah login --username $REGISTRY_USERNAME --password $REGISTRY_PASSWORD --tls-verify=false $REGISTRY_HOST
-    buildah tag $CONTAINER_DISK_NAME $REGISTRY_URL
-    buildah push --tls-verify=false $REGISTRY_URL
+    buildah login --username "$REGISTRY_USERNAME" --password "$REGISTRY_PASSWORD" --tls-verify=false "$REGISTRY_HOST"
+    buildah tag "$CONTAINER_DISK_NAME" "$REGISTRY_URL"
+    buildah push --tls-verify=false "$REGISTRY_URL"
   else
     REGISTRY_URL=$REGISTRY_HOST/$REGISTRY_USERNAME/$CONTAINER_DISK_NAME
 
-    buildah login --username $REGISTRY_USERNAME --password $REGISTRY_PASSWORD $REGISTRY_HOST
-    buildah tag $CONTAINER_DISK_NAME $REGISTRY_URL
-    buildah push $REGISTRY_URL
+    buildah login --username "$REGISTRY_USERNAME" --password "$REGISTRY_PASSWORD" "$REGISTRY_HOST"
+    buildah tag "$CONTAINER_DISK_NAME" "$REGISTRY_URL"
+    buildah push "$REGISTRY_URL"
   fi
 }
 
-function main() {
+main() {
   echo "Extracts disk and uploads it to a container registry..."
 
   validate_arguments
