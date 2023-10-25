@@ -29,7 +29,7 @@ validate_arguments() {
 apply_vmexport() {
   echo "Applying VirutalMachineExport object to expose Virutal Machine data..."
 
-	cat << END | kubectl apply -f -
+  cat <<END | kubectl apply -f -
 apiVersion: export.kubevirt.io/v1alpha1
 kind: VirtualMachineExport
 metadata:
@@ -48,10 +48,10 @@ download_disk_img() {
   usr/bin/virtctl vmexport download "$VM_NAME" --vm="$VM_NAME" --output="$TEMP_DISK_PATH"
 
   if [ -e "$TEMP_DISK_PATH" ] && [ -s "$TEMP_DISK_PATH" ]; then
-      echo "Donwload completed successfully."
+    echo "Donwload completed successfully."
   else
-      echo "Download failed."
-      exit 1
+    echo "Download failed."
+    exit 1
   fi
 }
 
@@ -74,7 +74,7 @@ build_container_img() {
 
   DOCKERFILE_PATH=$OUTPUT_PATH/Dockerfile
 
-  cat << END > $DOCKERFILE_PATH
+  cat <<END >$DOCKERFILE_PATH
 FROM scratch
 ADD --chown=107:107 ./disk.qcow2 /disk/
 END
@@ -83,7 +83,7 @@ END
 
 check_container_img() {
   echo "Checking container image size..."
-  
+
   IMAGE_SIZE=$(buildah images --format '{{.Size}}' --noheading "$CONTAINER_DISK_NAME")
 
   echo "Container image size is ${IMAGE_SIZE}."
