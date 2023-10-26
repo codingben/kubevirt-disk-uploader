@@ -59,6 +59,8 @@ spec:
       securityContext:
         capabilities:
           add:
+            # Building using buildah requires a properly installed shadow-utils package (which in turn requires SETFCAP)
+            # https://www.redhat.com/sysadmin/podman-inside-kubernetes
             - "SETFCAP"
         privileged: true
   restartPolicy: Never
