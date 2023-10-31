@@ -19,7 +19,7 @@ spec:
       source:
         registry:
           url: docker://quay.io/containerdisks/fedora:38
-  running: false
+  running: true
   template:
     metadata:
       labels:
