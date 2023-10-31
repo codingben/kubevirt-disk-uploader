@@ -9,6 +9,12 @@ spec:
   - metadata:
       creationTimestamp: null
       name: example-dv
+      annotations:
+        # ContainerDisk will be imported without starting the
+        # Virtual Machine (VM). Otherwise, VM should be started
+        # to import the ContainerDisk.
+        cdi.kubevirt.io/storage.bind.immediate.requested: "true"
+        cdi.kubevirt.io/storage.deleteAfterCompletion: "false"
     spec:
       storage:
         accessModes:
@@ -19,7 +25,7 @@ spec:
       source:
         registry:
           url: docker://quay.io/containerdisks/fedora:38
-  running: true
+  running: false
   template:
     metadata:
       labels:
