@@ -62,6 +62,7 @@ spec:
             # Building using buildah requires a properly installed shadow-utils package (which in turn requires SETFCAP)
             # https://www.redhat.com/sysadmin/podman-inside-kubernetes
             - "SETFCAP"
+        # Buildah inside a pod requires root privileges
         privileged: true
   restartPolicy: Never
 ---
