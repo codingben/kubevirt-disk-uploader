@@ -56,6 +56,11 @@ spec:
               key: registryHostname
       command: ["/usr/bin/kubevirt-disk-uploader.sh"]
       args: ["example-vm", "example-vm-exported:latest", "disk.img.gz"]
+      resources:
+        requests:
+          memory: 512Mi
+        limits:
+          memory: 1Gi
       securityContext:
         capabilities:
           add:
