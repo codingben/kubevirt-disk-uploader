@@ -54,21 +54,13 @@ spec:
             secretKeyRef:
               name: kubevirt-disk-uploader-credentials
               key: registryHostname
-      command: ["/usr/bin/kubevirt-disk-uploader.sh"]
+      command: ["/usr/local/bin/run-uploader.sh"]
       args: ["example-vm", "example-vm-exported:latest", "disk.img.gz"]
       resources:
         requests:
-          memory: 512Mi
+          memory: 3Gi
         limits:
-          memory: 1Gi
-      securityContext:
-        capabilities:
-          add:
-            # Building using buildah requires a properly installed shadow-utils package (which in turn requires SETFCAP)
-            # https://www.redhat.com/sysadmin/podman-inside-kubernetes
-            - "SETFCAP"
-        # Buildah inside a pod requires root privileges
-        privileged: true
+          memory: 5Gi
   restartPolicy: Never
 ---
 apiVersion: v1

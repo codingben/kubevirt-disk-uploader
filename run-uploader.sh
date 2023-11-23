@@ -69,54 +69,13 @@ convert_disk_img() {
   fi
 }
 
-build_container_img() {
-  echo "Building new container image with exported disk image..."
+upload_container_img() {
+  echo "Building and uploading new container image with exported disk image..."
 
-  DOCKERFILE_PATH=$OUTPUT_PATH/Dockerfile
+  DISK_PATH=$OUTPUT_PATH/disk.qcow2
+  IMAGE_DESTINATION=$REGISTRY_HOST/$REGISTRY_USERNAME/$CONTAINER_DISK_NAME
 
-  cat <<END >$DOCKERFILE_PATH
-FROM scratch
-ADD --chown=107:107 ./disk.qcow2 /disk/
-END
-  buildah build -t "$CONTAINER_DISK_NAME" $OUTPUT_PATH
-}
-
-check_container_img() {
-  echo "Checking container image size..."
-
-  IMAGE_SIZE=$(buildah images --format '{{.Size}}' --noheading "$CONTAINER_DISK_NAME")
-
-  echo "Container image size is ${IMAGE_SIZE}."
-}
-
-push_container_img() {
-  echo "Pushing the new container image to container registry..."
-
-  if [ -z "$REGISTRY_HOST" ]; then
-    echo "External container registry was not specified. Pushing the container image to local container registry..."
-
-    SERVER_URL=$(oc whoami --show-server)
-    SERVER_USERNAME="developer"
-    SERVER_PASSWORD="developer"
-
-    oc login "$SERVER_URL" --username $SERVER_USERNAME --password $SERVER_PASSWORD --insecure-skip-tls-verify
-    oc new-project "$VM_NAME"
-
-    REGISTRY_HOST=$(oc registry info)
-    REGISTRY_URL=$REGISTRY_HOST/$VM_NAME/$CONTAINER_DISK_NAME
-    REGISTRY_USERNAME=$(oc whoami)
-    REGISTRY_PASSWORD=$(oc whoami -t)
-
-    buildah login --username "$REGISTRY_USERNAME" --password "$REGISTRY_PASSWORD" --tls-verify=false "$REGISTRY_HOST"
-    buildah tag "$CONTAINER_DISK_NAME" "$REGISTRY_URL"
-    buildah push --tls-verify=false "$REGISTRY_URL"
-  else
-    REGISTRY_URL=$REGISTRY_HOST/$REGISTRY_USERNAME/$CONTAINER_DISK_NAME
-
-    buildah login --username "$REGISTRY_USERNAME" --password "$REGISTRY_PASSWORD" "$REGISTRY_HOST"
-    buildah tag "$CONTAINER_DISK_NAME" "$REGISTRY_URL"
-    buildah push "$REGISTRY_URL"
-  fi
+  kubevirt-disk-uploader -d $DISK_PATH -i "$IMAGE_DESTINATION"
 }
 
 main() {
@@ -126,9 +85,7 @@ main() {
   apply_vmexport
   download_disk_img
   convert_disk_img
-  build_container_img
-  check_container_img
-  push_container_img
+  upload_container_img
 
   echo "Succesfully extracted disk image and uploaded it in a new container image to container registry."
 }
