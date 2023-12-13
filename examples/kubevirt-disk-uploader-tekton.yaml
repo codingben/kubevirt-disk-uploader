@@ -1,0 +1,247 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: example-vm-task
+spec:
+  steps:
+  - name: deploy-example-vm
+    image: bitnami/kubectl
+    script: |
+      #!/bin/bash
+      cat <<EOF | kubectl apply -f -
+      apiVersion: kubevirt.io/v1
+      kind: VirtualMachine
+      metadata:
+        labels:
+          kubevirt.io/vm: example-vm-datavolume-tekton
+        name: example-vm-tekton
+      spec:
+        dataVolumeTemplates:
+        - metadata:
+            creationTimestamp: null
+            name: example-dv-tekton
+            annotations:
+              # ContainerDisk will be imported without starting the
+              # Virtual Machine (VM). Otherwise, VM should be started
+              # to import the ContainerDisk.
+              cdi.kubevirt.io/storage.bind.immediate.requested: "true"
+              cdi.kubevirt.io/storage.deleteAfterCompletion: "false"
+          spec:
+            storage:
+              accessModes:
+              - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 5Gi
+            source:
+              registry:
+                url: docker://quay.io/containerdisks/fedora:38
+        running: false
+        template:
+          metadata:
+            labels:
+              kubevirt.io/vm: example-vm-datavolume-tekton
+          spec:
+            domain:
+              devices:
+                disks:
+                - disk:
+                    bus: virtio
+                  name: datavolumedisk
+              resources:
+                requests:
+                  memory: 2Gi
+            terminationGracePeriodSeconds: 0
+            volumes:
+            - dataVolume:
+                name: example-dv-tekton
+              name: datavolumedisk
+      EOF
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: example-vm-exported-task
+spec:
+  steps:
+  - name: deploy-example-vm-exported
+    image: bitnami/kubectl
+    script: |
+      #!/bin/bash
+      cat <<EOF | kubectl apply -f -
+      apiVersion: kubevirt.io/v1
+      kind: VirtualMachine
+      metadata:
+        creationTimestamp: null
+        name: example-vm-exported-tekton
+      spec:
+        runStrategy: Always
+        template:
+          metadata:
+            creationTimestamp: null
+          spec:
+            domain:
+              devices:
+                disks:
+                - disk:
+                    bus: virtio
+                  name: containerdisk
+                rng: {}
+              features:
+                acpi: {}
+                smm:
+                  enabled: true
+              firmware:
+                bootloader:
+                  efi:
+                    secureBoot: true
+              resources:
+                requests:
+                  memory: 1Gi
+            terminationGracePeriodSeconds: 180
+            volumes:
+            - containerDisk:
+                image: quay.io/boukhano/example-vm-exported:latest
+              name: containerdisk
+      EOF
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kubevirt-disk-uploader-tekton
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: kubevirt-disk-uploader-tekton
+rules:
+- apiGroups: ["kubevirt.io"]
+  resources: ["virtualmachines"]
+  verbs: ["get", "create", "patch"]
+- apiGroups: ["export.kubevirt.io"]
+  resources: ["virtualmachineexports"]
+  verbs: ["get", "create"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: kubevirt-disk-uploader-tekton
+subjects:
+- kind: ServiceAccount
+  name: kubevirt-disk-uploader-tekton
+roleRef:
+  kind: Role
+  name: kubevirt-disk-uploader-tekton
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kubevirt-disk-uploader-credentials-tekton
+type: Opaque
+data:
+  registryUsername: ""
+  registryPassword: ""
+  registryHostname: ""
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: kubevirt-disk-uploader-task
+spec:
+  params:
+  - name: VM_NAME
+    description: The name of the virtual machine
+    type: string
+  - name: EXPORTED_IMAGE
+    description: The name of the exported image
+    type: string
+  - name: DISK_IMAGE
+    description: The name of the disk image
+    type: string
+  steps:
+  - name: kubevirt-disk-uploader-step
+    image: quay.io/boukhano/kubevirt-disk-uploader:latest
+    env:
+    - name: REGISTRY_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: kubevirt-disk-uploader-credentials-tekton
+          key: registryUsername
+    - name: REGISTRY_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: kubevirt-disk-uploader-credentials-tekton
+          key: registryPassword
+    - name: REGISTRY_HOST
+      valueFrom:
+        secretKeyRef:
+          name: kubevirt-disk-uploader-credentials-tekton
+          key: registryHostname
+    command: ["/usr/local/bin/run-uploader.sh"]
+    args:
+    - $(params.VM_NAME)
+    - $(params.EXPORTED_IMAGE)
+    - $(params.DISK_IMAGE)
+    resources:
+      requests:
+        memory: "3Gi"
+      limits:
+        memory: "5Gi"
+---
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: kubevirt-disk-uploader-pipeline
+spec:
+  params:
+  - name: VM_NAME
+    description: "Name of the virtual machine"
+    type: string
+  - name: EXPORTED_IMAGE
+    description: "Name of the exported image"
+    type: string
+  - name: DISK_IMAGE
+    description: "Name of the disk image"
+    type: string
+  tasks:
+  - name: deploy-example-vm
+    taskRef:
+      name: example-vm-task
+  - name: kubevirt-disk-uploader
+    taskRef:
+      name: kubevirt-disk-uploader-task
+    runAfter:
+      - deploy-example-vm
+    params:
+    - name: VM_NAME
+      value: "$(params.VM_NAME)"
+    - name: EXPORTED_IMAGE
+      value: "$(params.EXPORTED_IMAGE)"
+    - name: DISK_IMAGE
+      value: "$(params.DISK_IMAGE)"
+  - name: deploy-example-vm-exported
+    taskRef:
+      name: example-vm-exported-task
+    runAfter:
+      - kubevirt-disk-uploader
+---
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: kubevirt-disk-uploader-pipeline-run
+spec:
+  pipelineRef:
+    name: kubevirt-disk-uploader-pipeline
+  params:
+  - name: VM_NAME
+    value: example-vm
+  - name: EXPORTED_IMAGE
+    value: example-vm-exported:latest
+  - name: DISK_IMAGE
+    value: disk.img.gz
+  serviceAccountName: kubevirt-disk-uploader-tekton
