@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -e
 
 # Arguments
 VM_NAME=$1
