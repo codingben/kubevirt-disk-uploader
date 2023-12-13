@@ -144,9 +144,9 @@ metadata:
   name: kubevirt-disk-uploader-credentials-tekton
 type: Opaque
 data:
-  registryUsername: ""
-  registryPassword: ""
-  registryHostname: ""
+  registryUsername: "<REGISTRY_USERNAME>"
+  registryPassword: "<REGISTRY_PASSWORD>"
+  registryHostname: "<REGISTRY_HOSTNAME>"
 ---
 apiVersion: tekton.dev/v1beta1
 kind: Task
