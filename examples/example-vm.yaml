@@ -21,7 +21,7 @@ spec:
         - ReadWriteOnce
         resources:
           requests:
-            storage: 10Gi
+            storage: 5Gi
       source:
         registry:
           url: docker://quay.io/containerdisks/fedora:38
