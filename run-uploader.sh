@@ -4,6 +4,7 @@
 VM_NAME=$1
 CONTAINER_DISK_NAME=$2
 DISK_FILE=$3
+ENABLE_VIRT_SYSPREP=$4
 
 # Variables
 OUTPUT_PATH=./tmp
@@ -22,6 +23,11 @@ validate_arguments() {
 
   if [ -z "$DISK_FILE" ]; then
     echo "Disk file to extract is missing. Please provide a valid disk file."
+    exit 1
+  fi
+
+  if [ -z "$ENABLE_VIRT_SYSPREP" ]; then
+    echo "ENABLE_VIRT_SYSPREP is missing or empty. Please provide a valid value (true or false)."
     exit 1
   fi
 }
@@ -69,6 +75,19 @@ convert_disk_img() {
   fi
 }
 
+prep_disk_img() {
+  if [ "$ENABLE_VIRT_SYSPREP" = "true" ]; then
+    echo "Preparing disk image..."
+
+    DISK_PATH=$OUTPUT_PATH/disk.qcow2
+    export LIBGUESTFS_BACKEND=direct
+
+    virt-sysprep --format qcow2 -a $DISK_PATH
+  else
+    echo "Skipping disk image preparation."
+  fi
+}
+
 upload_container_img() {
   echo "Building and uploading new container image with exported disk image..."
 
@@ -85,6 +104,7 @@ main() {
   apply_vmexport
   download_disk_img
   convert_disk_img
+  prep_disk_img
   upload_container_img
 
   echo "Succesfully extracted disk image and uploaded it in a new container image to container registry."

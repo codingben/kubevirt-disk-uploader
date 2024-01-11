@@ -163,6 +163,9 @@ spec:
   - name: DISK_IMAGE
     description: The name of the disk image
     type: string
+  - name: ENABLE_VIRT_SYSPREP
+    description: Enable or disable preparation of disk image
+    type: string
   steps:
   - name: kubevirt-disk-uploader-step
     image: quay.io/boukhano/kubevirt-disk-uploader:latest
@@ -187,6 +190,7 @@ spec:
     - $(params.VM_NAME)
     - $(params.EXPORTED_IMAGE)
     - $(params.DISK_IMAGE)
+    - $(params.ENABLE_VIRT_SYSPREP)
     resources:
       requests:
         memory: "3Gi"
@@ -208,6 +212,9 @@ spec:
   - name: DISK_IMAGE
     description: "Name of the disk image"
     type: string
+  - name: ENABLE_VIRT_SYSPREP
+    description: "Enable or disable preparation of disk image"
+    type: string
   tasks:
   - name: deploy-example-vm
     taskRef:
@@ -224,6 +231,8 @@ spec:
       value: "$(params.EXPORTED_IMAGE)"
     - name: DISK_IMAGE
       value: "$(params.DISK_IMAGE)"
+    - name: ENABLE_VIRT_SYSPREP
+      value: "$(params.ENABLE_VIRT_SYSPREP)"
   - name: deploy-example-vm-exported
     taskRef:
       name: example-vm-exported-task
@@ -244,4 +253,6 @@ spec:
     value: example-vm-tekton-exported:latest
   - name: DISK_IMAGE
     value: disk.img.gz
+  - name: ENABLE_VIRT_SYSPREP
+    value: true
   serviceAccountName: kubevirt-disk-uploader-tekton
