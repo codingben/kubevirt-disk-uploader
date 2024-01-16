@@ -102,7 +102,7 @@ spec:
             terminationGracePeriodSeconds: 180
             volumes:
             - containerDisk:
-                image: quay.io/boukhano/example-vm-exported:latest
+                image: quay.io/boukhano/example-vm-tekton-exported:latest
               name: containerdisk
       EOF
 ---
@@ -239,9 +239,9 @@ spec:
     name: kubevirt-disk-uploader-pipeline
   params:
   - name: VM_NAME
-    value: example-vm
+    value: example-vm-tekton
   - name: EXPORTED_IMAGE
-    value: example-vm-exported:latest
+    value: example-vm-tekton-exported:latest
   - name: DISK_IMAGE
     value: disk.img.gz
   serviceAccountName: kubevirt-disk-uploader-tekton
