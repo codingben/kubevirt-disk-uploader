@@ -2,9 +2,10 @@
 
 # Arguments
 VM_NAME=$1
-CONTAINER_DISK_NAME=$2
-DISK_FILE=$3
-ENABLE_VIRT_SYSPREP=$4
+VOLUME_NAME=$2
+CONTAINER_DISK_NAME=$3
+DISK_FILE=$4
+ENABLE_VIRT_SYSPREP=$5
 
 # Variables
 OUTPUT_PATH=./tmp
@@ -13,6 +14,11 @@ TEMP_DISK_PATH=$OUTPUT_PATH/$DISK_FILE
 validate_arguments() {
   if [ -z "$VM_NAME" ]; then
     echo "Virtual Machine name is missing. Please provide a valid VM name."
+    exit 1
+  fi
+
+  if [ -z "$VOLUME_NAME" ]; then
+    echo "Volume name is missing. Please provide a valid Volume name."
     exit 1
   fi
 
@@ -51,7 +57,7 @@ END
 download_disk_img() {
   echo "Downloading disk image $DISK_FILE from $VM_NAME Virutal Machine..."
 
-  usr/bin/virtctl vmexport download "$VM_NAME" --vm="$VM_NAME" --output="$TEMP_DISK_PATH"
+  usr/bin/virtctl vmexport download "$VM_NAME" --vm="$VM_NAME" --volume "$VOLUME_NAME" --output="$TEMP_DISK_PATH"
 
   if [ -e "$TEMP_DISK_PATH" ] && [ -s "$TEMP_DISK_PATH" ]; then
     echo "Donwload completed successfully."

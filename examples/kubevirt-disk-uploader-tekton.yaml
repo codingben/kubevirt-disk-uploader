@@ -157,6 +157,9 @@ spec:
   - name: VM_NAME
     description: The name of the virtual machine
     type: string
+  - name: VOLUME_NAME
+    description: The volume name of the virtual machine
+    type: string
   - name: EXPORTED_IMAGE
     description: The name of the exported image
     type: string
@@ -188,6 +191,7 @@ spec:
     command: ["/usr/local/bin/run-uploader.sh"]
     args:
     - $(params.VM_NAME)
+    - $(params.VOLUME_NAME)
     - $(params.EXPORTED_IMAGE)
     - $(params.DISK_IMAGE)
     - $(params.ENABLE_VIRT_SYSPREP)
@@ -205,6 +209,9 @@ spec:
   params:
   - name: VM_NAME
     description: "Name of the virtual machine"
+    type: string
+  - name: VOLUME_NAME
+    description: "Volume name of the virtual machine"
     type: string
   - name: EXPORTED_IMAGE
     description: "Name of the exported image"
@@ -227,6 +234,8 @@ spec:
     params:
     - name: VM_NAME
       value: "$(params.VM_NAME)"
+    - name: VOLUME_NAME
+      value: "$(params.VOLUME_NAME)"
     - name: EXPORTED_IMAGE
       value: "$(params.EXPORTED_IMAGE)"
     - name: DISK_IMAGE
@@ -249,6 +258,8 @@ spec:
   params:
   - name: VM_NAME
     value: example-vm-tekton
+  - name: VOLUME_NAME
+    value: datavolumedisk
   - name: EXPORTED_IMAGE
     value: example-vm-tekton-exported:latest
   - name: DISK_IMAGE
