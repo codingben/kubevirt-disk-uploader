@@ -54,8 +54,8 @@ spec:
             secretKeyRef:
               name: kubevirt-disk-uploader-credentials
               key: registryHostname
-      command: ["/usr/local/bin/run-uploader.sh"]
-      # args: ["<VM_NAME>", "<VOLUME_NAME>", "<CONTAINER_DISK_NAME>", "<DISK_FILE>", "<ENABLE_VIRT_SYSPREP>"]
+      command: ["/usr/local/bin/kubevirt-disk-uploader"]
+      # args: ["--vmname", "example-vm", "--volumename", "datavolumedisk", "--containerdiskname", "example-vm-exported:latest", "--enablevirtsysprep"]
       resources:
         requests:
           memory: 3Gi

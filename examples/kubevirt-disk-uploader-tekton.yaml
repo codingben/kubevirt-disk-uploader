@@ -160,11 +160,8 @@ spec:
   - name: VOLUME_NAME
     description: The volume name of the virtual machine
     type: string
-  - name: EXPORTED_IMAGE
-    description: The name of the exported image
-    type: string
-  - name: DISK_IMAGE
-    description: The name of the disk image
+  - name: CONTAINER_DISK_NAME
+    description: The name of the new image
     type: string
   - name: ENABLE_VIRT_SYSPREP
     description: Enable or disable preparation of disk image
@@ -188,12 +185,15 @@ spec:
         secretKeyRef:
           name: kubevirt-disk-uploader-credentials-tekton
           key: registryHostname
-    command: ["/usr/local/bin/run-uploader.sh"]
+    command: ["/usr/local/bin/kubevirt-disk-uploader"]
     args:
+    - "--vmname"
     - $(params.VM_NAME)
+    - "--volumename"
     - $(params.VOLUME_NAME)
-    - $(params.EXPORTED_IMAGE)
-    - $(params.DISK_IMAGE)
+    - "--containerdiskname"
+    - $(params.CONTAINER_DISK_NAME)
+    - "--enablevirtsysprep"
     - $(params.ENABLE_VIRT_SYSPREP)
     resources:
       requests:
@@ -213,11 +213,8 @@ spec:
   - name: VOLUME_NAME
     description: "Volume name of the virtual machine"
     type: string
-  - name: EXPORTED_IMAGE
-    description: "Name of the exported image"
-    type: string
-  - name: DISK_IMAGE
-    description: "Name of the disk image"
+  - name: CONTAINER_DISK_NAME
+    description: "Name of the new image"
     type: string
   - name: ENABLE_VIRT_SYSPREP
     description: "Enable or disable preparation of disk image"
@@ -236,10 +233,8 @@ spec:
       value: "$(params.VM_NAME)"
     - name: VOLUME_NAME
       value: "$(params.VOLUME_NAME)"
-    - name: EXPORTED_IMAGE
-      value: "$(params.EXPORTED_IMAGE)"
-    - name: DISK_IMAGE
-      value: "$(params.DISK_IMAGE)"
+    - name: CONTAINER_DISK_NAME
+      value: "$(params.CONTAINER_DISK_NAME)"
     - name: ENABLE_VIRT_SYSPREP
       value: "$(params.ENABLE_VIRT_SYSPREP)"
   - name: deploy-example-vm-exported
@@ -260,10 +255,8 @@ spec:
     value: example-vm-tekton
   - name: VOLUME_NAME
     value: datavolumedisk
-  - name: EXPORTED_IMAGE
+  - name: CONTAINER_DISK_NAME
     value: example-vm-tekton-exported:latest
-  - name: DISK_IMAGE
-    value: disk.img.gz
   - name: ENABLE_VIRT_SYSPREP
     value: true
   serviceAccountName: kubevirt-disk-uploader-tekton

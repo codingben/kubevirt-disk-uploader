@@ -16,6 +16,5 @@ RUN cd /usr/bin && \
     microdnf install -y gzip qemu-img libguestfs-tools-c && \
     microdnf clean all -y
 COPY --from=builder /app/kubevirt-disk-uploader /usr/local/bin/kubevirt-disk-uploader
-COPY run-uploader.sh /usr/local/bin/run-uploader.sh
 
-ENTRYPOINT ["/usr/local/bin/run-uploader.sh"]
+ENTRYPOINT ["/usr/local/bin/kubevirt-disk-uploader"]
