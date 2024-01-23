@@ -1,0 +1,47 @@
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  labels:
+    kubevirt.io/vm: vm-example-datavolume
+  name: example-vm-tekton
+spec:
+  dataVolumeTemplates:
+  - metadata:
+      creationTimestamp: null
+      name: example-dv-tekton
+      annotations:
+        # ContainerDisk will be imported without starting the
+        # Virtual Machine (VM). Otherwise, VM should be started
+        # to import the ContainerDisk.
+        cdi.kubevirt.io/storage.bind.immediate.requested: "true"
+        cdi.kubevirt.io/storage.deleteAfterCompletion: "false"
+    spec:
+      storage:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi
+      source:
+        registry:
+          url: docker://quay.io/containerdisks/fedora:39
+  running: false
+  template:
+    metadata:
+      labels:
+        kubevirt.io/vm: vm-example-datavolume-tekton
+    spec:
+      domain:
+        devices:
+          disks:
+          - disk:
+              bus: virtio
+            name: datavolumedisk
+        resources:
+          requests:
+            memory: 2Gi
+      terminationGracePeriodSeconds: 0
+      volumes:
+      - dataVolume:
+          name: example-dv-tekton
+        name: datavolumedisk

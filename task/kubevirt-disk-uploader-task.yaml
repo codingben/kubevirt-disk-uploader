@@ -1,0 +1,61 @@
+---
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: kubevirt-disk-uploader-task
+  labels:
+    app.kubernetes.io/version: "0.4.0"
+  annotations:
+    tekton.dev/pipelines.minVersion: "0.43.0"
+    tekton.dev/categories: Automation
+    tekton.dev/tags: kubevirt, containerdisks
+    tekton.dev/displayName: "KubeVirt Disk Uploader"
+    tekton.dev/platforms: "linux/amd64"
+spec:
+  params:
+  - name: VM_NAME
+    description: The name of the virtual machine
+    type: string
+  - name: VOLUME_NAME
+    description: The volume name of the virtual machine
+    type: string
+  - name: CONTAINER_DISK_NAME
+    description: The name of the new image
+    type: string
+  - name: ENABLE_VIRT_SYSPREP
+    description: Enable or disable preparation of disk image
+    type: string
+  steps:
+  - name: kubevirt-disk-uploader-step
+    image: quay.io/boukhano/kubevirt-disk-uploader:latest
+    env:
+    - name: REGISTRY_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: kubevirt-disk-uploader-credentials-tekton
+          key: registryUsername
+    - name: REGISTRY_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: kubevirt-disk-uploader-credentials-tekton
+          key: registryPassword
+    - name: REGISTRY_HOST
+      valueFrom:
+        secretKeyRef:
+          name: kubevirt-disk-uploader-credentials-tekton
+          key: registryHostname
+    command: ["/usr/local/bin/kubevirt-disk-uploader"]
+    args:
+    - "--vmname"
+    - $(params.VM_NAME)
+    - "--volumename"
+    - $(params.VOLUME_NAME)
+    - "--containerdiskname"
+    - $(params.CONTAINER_DISK_NAME)
+    - "--enablevirtsysprep"
+    - $(params.ENABLE_VIRT_SYSPREP)
+    computeResources:
+      requests:
+        memory: "3Gi"
+      limits:
+        memory: "5Gi"
