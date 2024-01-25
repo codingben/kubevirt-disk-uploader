@@ -1,5 +1,5 @@
 ---
-apiVersion: tekton.dev/v1beta1
+apiVersion: tekton.dev/v1
 kind: Task
 metadata:
   name: example-vm-task
@@ -36,7 +36,7 @@ spec:
                   storage: 5Gi
             source:
               registry:
-                url: docker://quay.io/containerdisks/fedora:38
+                url: docker://quay.io/containerdisks/fedora:39
         running: false
         template:
           metadata:
@@ -59,7 +59,7 @@ spec:
               name: datavolumedisk
       EOF
 ---
-apiVersion: tekton.dev/v1beta1
+apiVersion: tekton.dev/v1
 kind: Task
 metadata:
   name: example-vm-exported-task
@@ -148,7 +148,7 @@ data:
   registryPassword: "<REGISTRY_PASSWORD>"
   registryHostname: "<REGISTRY_HOSTNAME>"
 ---
-apiVersion: tekton.dev/v1beta1
+apiVersion: tekton.dev/v1
 kind: Task
 metadata:
   name: kubevirt-disk-uploader-task
@@ -195,13 +195,13 @@ spec:
     - $(params.CONTAINER_DISK_NAME)
     - "--enablevirtsysprep"
     - $(params.ENABLE_VIRT_SYSPREP)
-    resources:
+    computeResources:
       requests:
         memory: "3Gi"
       limits:
         memory: "5Gi"
 ---
-apiVersion: tekton.dev/v1beta1
+apiVersion: tekton.dev/v1
 kind: Pipeline
 metadata:
   name: kubevirt-disk-uploader-pipeline
@@ -243,7 +243,7 @@ spec:
     runAfter:
       - kubevirt-disk-uploader
 ---
-apiVersion: tekton.dev/v1beta1
+apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
   name: kubevirt-disk-uploader-pipeline-run
@@ -259,4 +259,5 @@ spec:
     value: example-vm-tekton-exported:latest
   - name: ENABLE_VIRT_SYSPREP
     value: true
-  serviceAccountName: kubevirt-disk-uploader-tekton
+  taskRunTemplate:
+    serviceAccountName: kubevirt-disk-uploader-tekton
