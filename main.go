@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"time"
 
@@ -104,21 +105,26 @@ func convertRawDiskImageToQcow2() error {
 	return nil
 }
 
-func prepareVirtualMachineDiskImage(enableVirtSysprep bool) error {
-	if enableVirtSysprep {
-		log.Println("Preparing disk image...")
-
-		os.Setenv("LIBGUESTFS_BACKEND", "direct")
-		cmd := exec.Command("virt-sysprep", "--format", "qcow2", "-a", diskPathConverted)
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-
-		if err := cmd.Run(); err != nil {
-			return err
-		}
-	} else {
-		log.Println("Skipping disk image preparation.")
+func prepareVirtualMachineDiskImage(enableVirtSysprep string) error {
+	enabled, err := strconv.ParseBool(enableVirtSysprep)
+	if err != nil {
+		return err
 	}
+
+	if !enabled {
+		log.Println("Skipping disk image preparation.")
+		return nil
+	}
+
+	os.Setenv("LIBGUESTFS_BACKEND", "direct")
+	cmd := exec.Command("virt-sysprep", "--format", "qcow2", "-a", diskPathConverted)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if err := cmd.Run(); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -162,7 +168,7 @@ func pushContainerDisk(image v1.Image, containerDiskName string) error {
 	return nil
 }
 
-func run(vmName, volumeName, containerDiskName string, enableVirtSysprep bool) error {
+func run(vmName, volumeName, containerDiskName, enableVirtSysprep string) error {
 	if err := applyVirtualMachineExport(vmName); err != nil {
 		return err
 	}
@@ -195,7 +201,7 @@ func main() {
 	var vmName string
 	var volumeName string
 	var containerDiskName string
-	var enableVirtSysprep bool
+	var enableVirtSysprep string
 
 	var command = &cobra.Command{
 		Use:   "kubevirt-disk-uploader",
@@ -214,7 +220,7 @@ func main() {
 	command.Flags().StringVar(&vmName, "vmname", "", "name of the virtual machine")
 	command.Flags().StringVar(&volumeName, "volumename", "", "volume name of the virtual machine")
 	command.Flags().StringVar(&containerDiskName, "containerdiskname", "", "name of the new container image")
-	command.Flags().BoolVar(&enableVirtSysprep, "enablevirtsysprep", false, "enable or disable virt-sysprep")
+	command.Flags().StringVar(&enableVirtSysprep, "enablevirtsysprep", "false", "enable or disable virt-sysprep")
 	command.MarkFlagRequired("vmname")
 	command.MarkFlagRequired("volumename")
 	command.MarkFlagRequired("containerDiskName")
