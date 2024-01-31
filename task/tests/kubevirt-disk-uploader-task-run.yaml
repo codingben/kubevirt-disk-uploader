@@ -14,3 +14,5 @@ spec:
     value: example-vm-tekton-exported:latest
   - name: ENABLE_VIRT_SYSPREP
     value: false
+  - name: PUSH_TIMEOUT
+    value: 120

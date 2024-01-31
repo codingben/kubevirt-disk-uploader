@@ -166,6 +166,9 @@ spec:
   - name: ENABLE_VIRT_SYSPREP
     description: Enable or disable preparation of disk image
     type: string
+  - name: PUSH_TIMEOUT
+    description: ContainerDisk push timeout in minutes
+    type: string
   steps:
   - name: kubevirt-disk-uploader-step
     image: quay.io/boukhano/kubevirt-disk-uploader:latest
@@ -195,6 +198,8 @@ spec:
     - $(params.CONTAINER_DISK_NAME)
     - "--enablevirtsysprep"
     - $(params.ENABLE_VIRT_SYSPREP)
+    - "--pushtimeout"
+    - $(params.PUSH_TIMEOUT)
     computeResources:
       requests:
         memory: "3Gi"
@@ -219,6 +224,9 @@ spec:
   - name: ENABLE_VIRT_SYSPREP
     description: "Enable or disable preparation of disk image"
     type: string
+  - name: PUSH_TIMEOUT
+    description: "ContainerDisk push timeout in minutes"
+    type: string
   tasks:
   - name: deploy-example-vm
     taskRef:
@@ -237,6 +245,8 @@ spec:
       value: "$(params.CONTAINER_DISK_NAME)"
     - name: ENABLE_VIRT_SYSPREP
       value: "$(params.ENABLE_VIRT_SYSPREP)"
+    - name: PUSH_TIMEOUT
+      value: "$(params.PUSH_TIMEOUT)"
   - name: deploy-example-vm-exported
     taskRef:
       name: example-vm-exported-task
@@ -259,5 +269,7 @@ spec:
     value: example-vm-tekton-exported:latest
   - name: ENABLE_VIRT_SYSPREP
     value: true
+  - name: PUSH_TIMEOUT
+    value: 120
   taskRunTemplate:
     serviceAccountName: kubevirt-disk-uploader-tekton
