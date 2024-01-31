@@ -4,7 +4,7 @@ kind: Task
 metadata:
   name: kubevirt-disk-uploader-task
   labels:
-    app.kubernetes.io/version: "0.4.0"
+    app.kubernetes.io/version: "0.5.0"
   annotations:
     tekton.dev/pipelines.minVersion: "0.43.0"
     tekton.dev/categories: Automation
