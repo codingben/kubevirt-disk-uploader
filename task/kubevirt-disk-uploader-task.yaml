@@ -30,7 +30,7 @@ spec:
     type: string
   steps:
   - name: kubevirt-disk-uploader-step
-    image: quay.io/boukhano/kubevirt-disk-uploader:latest
+    image: quay.io/boukhano/kubevirt-disk-uploader:v0.5.0
     env:
     - name: REGISTRY_USERNAME
       valueFrom:
