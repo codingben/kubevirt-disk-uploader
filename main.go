@@ -145,8 +145,8 @@ func buildContainerDisk(diskPath string) (v1.Image, error) {
 	return image, nil
 }
 
-func pushContainerDisk(image v1.Image, containerDiskName string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*30)
+func pushContainerDisk(image v1.Image, containerDiskName string, pushTimeout int) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*time.Duration(pushTimeout))
 	defer cancel()
 
 	hostName := os.Getenv("REGISTRY_HOST")
@@ -168,7 +168,7 @@ func pushContainerDisk(image v1.Image, containerDiskName string) error {
 	return nil
 }
 
-func run(vmName, volumeName, containerDiskName, enableVirtSysprep string) error {
+func run(vmName, volumeName, containerDiskName, enableVirtSysprep string, pushTimeout int) error {
 	if err := applyVirtualMachineExport(vmName); err != nil {
 		return err
 	}
@@ -194,7 +194,7 @@ func run(vmName, volumeName, containerDiskName, enableVirtSysprep string) error 
 		return err
 	}
 
-	return pushContainerDisk(image, containerDiskName)
+	return pushContainerDisk(image, containerDiskName, pushTimeout)
 }
 
 func main() {
@@ -202,6 +202,7 @@ func main() {
 	var volumeName string
 	var containerDiskName string
 	var enableVirtSysprep string
+	var pushTimeout int
 
 	var command = &cobra.Command{
 		Use:   "kubevirt-disk-uploader",
@@ -209,7 +210,7 @@ func main() {
 		Run: func(cmd *cobra.Command, args []string) {
 			log.Println("Extracts disk and uploads it to a container registry...")
 
-			if err := run(vmName, volumeName, containerDiskName, enableVirtSysprep); err != nil {
+			if err := run(vmName, volumeName, containerDiskName, enableVirtSysprep, pushTimeout); err != nil {
 				log.Panicln(err)
 			}
 
@@ -221,6 +222,7 @@ func main() {
 	command.Flags().StringVar(&volumeName, "volumename", "", "volume name of the virtual machine")
 	command.Flags().StringVar(&containerDiskName, "containerdiskname", "", "name of the new container image")
 	command.Flags().StringVar(&enableVirtSysprep, "enablevirtsysprep", "false", "enable or disable virt-sysprep")
+	command.Flags().IntVar(&pushTimeout, "pushtimeout", 60, "containerdisk push timeout in minutes")
 	command.MarkFlagRequired("vmname")
 	command.MarkFlagRequired("volumename")
 	command.MarkFlagRequired("containerDiskName")
