@@ -58,4 +58,6 @@ spec:
     value: <CONTAINER_DISK_NAME_VALUE>
   - name: ENABLE_VIRT_SYSPREP
     value: <ENABLE_VIRT_SYSPREP_VALUE>
+  - name: PUSH_TIMEOUT
+    value: <PUSH_TIMEOUT>
 ```
