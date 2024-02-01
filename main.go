@@ -145,11 +145,10 @@ func buildContainerDisk(diskPath string) (v1.Image, error) {
 	return image, nil
 }
 
-func pushContainerDisk(image v1.Image, containerDiskName string, pushTimeout int) error {
+func pushContainerDisk(image v1.Image, imageDestination string, pushTimeout int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*time.Duration(pushTimeout))
 	defer cancel()
 
-	hostName := os.Getenv("REGISTRY_HOST")
 	userName := os.Getenv("REGISTRY_USERNAME")
 	password := os.Getenv("REGISTRY_PASSWORD")
 	auth := &authn.Basic{
@@ -157,7 +156,6 @@ func pushContainerDisk(image v1.Image, containerDiskName string, pushTimeout int
 		Password: password,
 	}
 
-	imageDestination := fmt.Sprintf("%s/%s/%s", hostName, userName, containerDiskName)
 	err := crane.Push(image, imageDestination, crane.WithAuth(auth), crane.WithContext(ctx))
 	if err != nil {
 		log.Fatalf("Error pushing image: %v", err)
@@ -168,7 +166,7 @@ func pushContainerDisk(image v1.Image, containerDiskName string, pushTimeout int
 	return nil
 }
 
-func run(vmName, volumeName, containerDiskName, enableVirtSysprep string, pushTimeout int) error {
+func run(vmName, volumeName, imageDestination, enableVirtSysprep string, pushTimeout int) error {
 	if err := applyVirtualMachineExport(vmName); err != nil {
 		return err
 	}
@@ -194,13 +192,13 @@ func run(vmName, volumeName, containerDiskName, enableVirtSysprep string, pushTi
 		return err
 	}
 
-	return pushContainerDisk(image, containerDiskName, pushTimeout)
+	return pushContainerDisk(image, imageDestination, pushTimeout)
 }
 
 func main() {
 	var vmName string
 	var volumeName string
-	var containerDiskName string
+	var imageDestination string
 	var enableVirtSysprep string
 	var pushTimeout int
 
@@ -210,7 +208,7 @@ func main() {
 		Run: func(cmd *cobra.Command, args []string) {
 			log.Println("Extracts disk and uploads it to a container registry...")
 
-			if err := run(vmName, volumeName, containerDiskName, enableVirtSysprep, pushTimeout); err != nil {
+			if err := run(vmName, volumeName, imageDestination, enableVirtSysprep, pushTimeout); err != nil {
 				log.Panicln(err)
 			}
 
@@ -220,12 +218,12 @@ func main() {
 
 	command.Flags().StringVar(&vmName, "vmname", "", "name of the virtual machine")
 	command.Flags().StringVar(&volumeName, "volumename", "", "volume name of the virtual machine")
-	command.Flags().StringVar(&containerDiskName, "containerdiskname", "", "name of the new container image")
+	command.Flags().StringVar(&imageDestination, "imagedestination", "", "destination of the image in container registry")
 	command.Flags().StringVar(&enableVirtSysprep, "enablevirtsysprep", "false", "enable or disable virt-sysprep")
 	command.Flags().IntVar(&pushTimeout, "pushtimeout", 60, "containerdisk push timeout in minutes")
 	command.MarkFlagRequired("vmname")
 	command.MarkFlagRequired("volumename")
-	command.MarkFlagRequired("containerDiskName")
+	command.MarkFlagRequired("imagedestination")
 
 	if err := command.Execute(); err != nil {
 		log.Println(err)

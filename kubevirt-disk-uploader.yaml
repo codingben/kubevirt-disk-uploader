@@ -49,13 +49,8 @@ spec:
             secretKeyRef:
               name: kubevirt-disk-uploader-credentials
               key: registryPassword
-        - name: REGISTRY_HOST
-          valueFrom:
-            secretKeyRef:
-              name: kubevirt-disk-uploader-credentials
-              key: registryHostname
       command: ["/usr/local/bin/kubevirt-disk-uploader"]
-      # args: ["--vmname", "example-vm", "--volumename", "datavolumedisk", "--containerdiskname", "example-vm-exported:latest", "--enablevirtsysprep", "false", "--pushtimeout", "120"]
+      # args: ["--vmname", "example-vm", "--volumename", "datavolumedisk", "--imagedestination", "quay.io/boukhano/example-vm-exported:latest", "--enablevirtsysprep", "false", "--pushtimeout", "120"]
       resources:
         requests:
           memory: 3Gi
@@ -71,4 +66,3 @@ type: Opaque
 data:
   registryUsername: "<REGISTRY_USERNAME>"
   registryPassword: "<REGISTRY_PASSWORD>"
-  registryHostname: "<REGISTRY_HOSTNAME>"
