@@ -12,6 +12,9 @@ metadata:
     tekton.dev/displayName: "KubeVirt Disk Uploader"
     tekton.dev/platforms: "linux/amd64"
 spec:
+  description: >-
+    Automates the extraction of disk and uploads it to a container registry,
+    to be used in multiple Kubernetes clusters.
   params:
   - name: VM_NAME
     description: The name of the virtual machine
