@@ -19,8 +19,8 @@ spec:
   - name: VOLUME_NAME
     description: The volume name of the virtual machine
     type: string
-  - name: CONTAINER_DISK_NAME
-    description: The name of the new image
+  - name: IMAGE_DESTINATION
+    description: Destination of the image in container registry
     type: string
   - name: ENABLE_VIRT_SYSPREP
     description: Enable or disable preparation of disk image
@@ -42,19 +42,14 @@ spec:
         secretKeyRef:
           name: kubevirt-disk-uploader-credentials-tekton
           key: registryPassword
-    - name: REGISTRY_HOST
-      valueFrom:
-        secretKeyRef:
-          name: kubevirt-disk-uploader-credentials-tekton
-          key: registryHostname
     command: ["/usr/local/bin/kubevirt-disk-uploader"]
     args:
     - "--vmname"
     - $(params.VM_NAME)
     - "--volumename"
     - $(params.VOLUME_NAME)
-    - "--containerdiskname"
-    - $(params.CONTAINER_DISK_NAME)
+    - "--imagedestination"
+    - $(params.IMAGE_DESTINATION)
     - "--enablevirtsysprep"
     - $(params.ENABLE_VIRT_SYSPREP)
     - "--pushtimeout"

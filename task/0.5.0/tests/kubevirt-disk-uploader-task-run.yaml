@@ -10,8 +10,8 @@ spec:
     value: example-vm-tekton
   - name: VOLUME_NAME
     value: datavolumedisk
-  - name: CONTAINER_DISK_NAME
-    value: example-vm-tekton-exported:latest
+  - name: IMAGE_DESTINATION
+    value: quay.io/boukhano/example-vm-tekton-exported:latest
   - name: ENABLE_VIRT_SYSPREP
     value: false
   - name: PUSH_TIMEOUT
