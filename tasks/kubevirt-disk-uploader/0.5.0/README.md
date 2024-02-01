@@ -9,7 +9,7 @@ When user runs [KubeVirt Tekton Tasks](https://github.com/kubevirt/kubevirt-tekt
 # Installation
 
 ```
-kubectl apply -f https://raw.githubusercontent.com/codingben/kubevirt-disk-uploader/0.5.0/tasks/kubevirt-disk-uploader/0.5.0/kubevirt-disk-uploader.yaml
+kubectl apply -f https://raw.githubusercontent.com/codingben/kubevirt-disk-uploader/v0.5.0/tasks/kubevirt-disk-uploader/0.5.0/kubevirt-disk-uploader.yaml
 ```
 
 # Parameters
