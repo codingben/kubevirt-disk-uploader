@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/google/go-containerregistry/pkg/authn"
@@ -18,6 +17,11 @@ import (
 	"github.com/google/go-containerregistry/pkg/v1/tarball"
 
 	cobra "github.com/spf13/cobra"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	kvcorev1 "kubevirt.io/api/core/v1"
+	v1beta1 "kubevirt.io/api/export/v1beta1"
+	kubecli "kubevirt.io/client-go/kubecli"
 	tar "kubevirt.io/containerdisks/pkg/build"
 )
 
@@ -30,26 +34,31 @@ const (
 func applyVirtualMachineExport(vmName string) error {
 	log.Println("Applying VirtualMachineExport object...")
 
-	yaml := fmt.Sprintf(`
-apiVersion: export.kubevirt.io/v1alpha1
-kind: VirtualMachineExport
-metadata:
-  name: %s
-spec:
-  source:
-    apiGroup: "kubevirt.io"
-    kind: VirtualMachine
-    name: %s
-`, vmName, vmName)
-	cmd := exec.Command("kubectl", "apply", "-f", "-")
-	cmd.Stdin = strings.NewReader(yaml)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	if err := cmd.Run(); err != nil {
+	client, err := kubecli.GetKubevirtClient()
+	if err != nil {
 		return err
 	}
-	return nil
+
+	vmNamespace := os.Getenv("VM_NAMESPACE")
+	if vmNamespace == "" {
+		return fmt.Errorf("VM namespace is not defined. Set VM_NAMESPACE.")
+	}
+
+	vmExport := &v1beta1.VirtualMachineExport{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: vmName,
+		},
+		Spec: v1beta1.VirtualMachineExportSpec{
+			Source: corev1.TypedLocalObjectReference{
+				APIGroup: &kvcorev1.GroupVersion.Version,
+				Kind:     kvcorev1.VirtualMachineGroupVersionKind.Kind,
+				Name:     vmName,
+			},
+		},
+	}
+
+	_, err = client.VirtualMachineExport(vmNamespace).Create(context.Background(), vmExport, metav1.CreateOptions{})
+	return err
 }
 
 func downloadVirtualMachineDiskImage(vmName, volumeName string) error {
