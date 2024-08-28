@@ -31,7 +31,7 @@ const (
 	diskPathConverted    string = "./tmp/disk.qcow2"
 )
 
-func applyVirtualMachineExport(vmName string) error {
+func applyVirtualMachineExport(vmNamespace, vmName string) error {
 	log.Println("Applying VirtualMachineExport object...")
 
 	client, err := kubecli.GetKubevirtClient()
@@ -39,14 +39,19 @@ func applyVirtualMachineExport(vmName string) error {
 		return err
 	}
 
-	vmNamespace := os.Getenv("VM_NAMESPACE")
+	env := os.Getenv("VM_NAMESPACE")
+	if env != "" {
+		vmNamespace = env
+	}
+
 	if vmNamespace == "" {
-		return fmt.Errorf("VM namespace is not defined. Set VM_NAMESPACE.")
+		return fmt.Errorf("VM namespace is not defined. Set VM_NAMESPACE or parameter.")
 	}
 
 	vmExport := &v1beta1.VirtualMachineExport{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: vmName,
+			Name:      vmName,
+			Namespace: vmNamespace,
 		},
 		Spec: v1beta1.VirtualMachineExportSpec{
 			Source: corev1.TypedLocalObjectReference{
@@ -175,8 +180,8 @@ func pushContainerDisk(image v1.Image, imageDestination string, pushTimeout int)
 	return nil
 }
 
-func run(vmName, volumeName, imageDestination, enableVirtSysprep string, pushTimeout int) error {
-	if err := applyVirtualMachineExport(vmName); err != nil {
+func run(vmNamespace, vmName, volumeName, imageDestination, enableVirtSysprep string, pushTimeout int) error {
+	if err := applyVirtualMachineExport(vmNamespace, vmName); err != nil {
 		return err
 	}
 
@@ -205,6 +210,7 @@ func run(vmName, volumeName, imageDestination, enableVirtSysprep string, pushTim
 }
 
 func main() {
+	var vmNamespace string
 	var vmName string
 	var volumeName string
 	var imageDestination string
@@ -217,7 +223,7 @@ func main() {
 		Run: func(cmd *cobra.Command, args []string) {
 			log.Println("Extracts disk and uploads it to a container registry...")
 
-			if err := run(vmName, volumeName, imageDestination, enableVirtSysprep, pushTimeout); err != nil {
+			if err := run(vmNamespace, vmName, volumeName, imageDestination, enableVirtSysprep, pushTimeout); err != nil {
 				log.Panicln(err)
 			}
 
@@ -225,6 +231,7 @@ func main() {
 		},
 	}
 
+	command.Flags().StringVar(&vmNamespace, "vmnamespace", "", "namespace of the virtual machine")
 	command.Flags().StringVar(&vmName, "vmname", "", "name of the virtual machine")
 	command.Flags().StringVar(&volumeName, "volumename", "", "volume name of the virtual machine")
 	command.Flags().StringVar(&imageDestination, "imagedestination", "", "destination of the image in container registry")

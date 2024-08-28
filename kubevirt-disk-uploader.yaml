@@ -49,6 +49,10 @@ spec:
             secretKeyRef:
               name: kubevirt-disk-uploader-credentials
               key: registryPassword
+        - name: VM_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
       command: ["/usr/local/bin/kubevirt-disk-uploader"]
       # args: ["--vmname", "example-vm", "--volumename", "datavolumedisk", "--imagedestination", "quay.io/boukhano/example-vm-exported:latest", "--enablevirtsysprep", "false", "--pushtimeout", "120"]
       resources:

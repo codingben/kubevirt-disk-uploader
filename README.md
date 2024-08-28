@@ -15,7 +15,7 @@ KubeVirt Disk Uploader -> Download VM Disk -> Build New Container Disk -> Push T
 **Prerequisites**
 
 1. Ensure Virtual Machine (VM) is powered off. Data from VM can be exported only when it is not used.
-2. Modify [kubevirt-disk-uploader](https://github.com/codingben/kubevirt-disk-uploader/blob/main/kubevirt-disk-uploader.yaml#L58) arguments (VM Name, Volume Name, Image Destination, Enable or Disable System Preparation and Push Timeout).
+2. Modify [kubevirt-disk-uploader](https://github.com/codingben/kubevirt-disk-uploader/blob/main/kubevirt-disk-uploader.yaml#L58) arguments (VM Namespace, VM Name, Volume Name, Image Destination, Enable or Disable System Preparation and Push Timeout).
 3. Modify [kubevirt-disk-uploader-credentials](https://github.com/codingben/kubevirt-disk-uploader/blob/main/kubevirt-disk-uploader.yaml#L65-L74) of the external container registry (Username, Password and Hostname).
 
 Deploy `kubevirt-disk-uploader` within the same namespace as the Virtual Machine (VM):
@@ -23,6 +23,8 @@ Deploy `kubevirt-disk-uploader` within the same namespace as the Virtual Machine
 ```
 kubectl apply -f kubevirt-disk-uploader.yaml -n $VM_NAMESPACE
 ```
+
+**Note**: If both `VM_NAMESPACE` and `--vmnamespace` argument are set, `VM_NAMESPACE` will be used.
 
 ## KubeVirt Documentation
 
