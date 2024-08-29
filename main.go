@@ -1,8 +1,10 @@
 package main
 
 import (
+	"compress/gzip"
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -83,15 +85,35 @@ func downloadVirtualMachineDiskImage(vmName, volumeName string) error {
 func decompressVirtualMachineDiskImage() error {
 	log.Println("Decompressing downloaded disk image...")
 
-	cmd := exec.Command("gunzip", diskPath)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	diskImg, err := os.Open(diskPath)
+	if err != nil {
+		return err
+	}
+	defer diskImg.Close()
 
-	if err := cmd.Run(); err != nil {
+	gzipReader, err := gzip.NewReader(diskImg)
+	if err != nil {
+		return err
+	}
+	defer gzipReader.Close()
+
+	newDiskImg, err := os.Create(diskPathDecompressed)
+	if err != nil {
+		return err
+	}
+	defer newDiskImg.Close()
+
+	_, err = io.Copy(newDiskImg, gzipReader)
+	if err != nil {
 		return err
 	}
 
-	log.Println("Decompressed completed successfully.")
+	err = os.Chmod(diskPathDecompressed, 0666) // Grants read and write permission to everyone.
+	if err != nil {
+		return err
+	}
+
+	log.Println("Decompression completed successfully.")
 	return nil
 }
 

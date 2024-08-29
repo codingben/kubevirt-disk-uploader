@@ -11,7 +11,7 @@ FROM quay.io/fedora/fedora-minimal:39
 RUN cd /usr/bin && \
     curl -L https://github.com/kubevirt/kubevirt/releases/download/v1.0.0/virtctl-v1.0.0-linux-amd64 --output virtctl && \
     chmod +x virtctl && \
-    microdnf install -y gzip qemu-img libguestfs-tools-c && \
+    microdnf install -y qemu-img libguestfs-tools-c && \
     microdnf clean all -y
 COPY --from=builder /app/kubevirt-disk-uploader /usr/local/bin/kubevirt-disk-uploader
 
