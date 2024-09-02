@@ -33,7 +33,7 @@ spec:
     type: string
   steps:
   - name: kubevirt-disk-uploader-step
-    image: quay.io/boukhano/kubevirt-disk-uploader:v0.5.0
+    image: quay.io/ksimon/kubevirt-disk-uploader:latest
     env:
     - name: REGISTRY_USERNAME
       valueFrom:
@@ -66,3 +66,10 @@ spec:
         memory: "3Gi"
       limits:
         memory: "5Gi"
+    volumeMounts:
+      - mountPath: /tmp/targetpvc/
+        name: targetpvc
+  volumes:
+    - name: targetpvc
+      persistentVolumeClaim:
+        claimName: $(params.VOLUME_NAME)

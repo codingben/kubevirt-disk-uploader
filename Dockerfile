@@ -4,7 +4,7 @@ WORKDIR /app
 COPY go.mod go.sum ./
 COPY vendor/ ./vendor
 COPY main.go .
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o kubevirt-disk-uploader .
+RUN CGO_ENABLED=0 GOOS=linux GODEBUG=http2client=0 GOARCH=amd64 go build -o kubevirt-disk-uploader .
 
 FROM quay.io/fedora/fedora-minimal:39
 
