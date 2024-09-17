@@ -17,7 +17,6 @@ kubectl apply -f https://raw.githubusercontent.com/codingben/kubevirt-disk-uploa
 - **VM_NAME**: The name of the virtual machine
 - **VOLUME_NAME**: The volume name of the virtual machine
 - **IMAGE_DESTINATION**: Destination of the image in container registry
-- **ENABLE_VIRT_SYSPREP**: Enable or disable preparation of disk image
 - **PUSH_TIMEOUT**: ContainerDisk push timeout in minutes
 
 # Usage
@@ -55,8 +54,6 @@ spec:
     value: <VOLUME_NAME_VALUE>
   - name: IMAGE_DESTINATION
     value: <IMAGE_DESTINATION_VALUE>
-  - name: ENABLE_VIRT_SYSPREP
-    value: <ENABLE_VIRT_SYSPREP_VALUE>
   - name: PUSH_TIMEOUT
     value: <PUSH_TIMEOUT>
 ```
