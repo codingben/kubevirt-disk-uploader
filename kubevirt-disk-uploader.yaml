@@ -54,12 +54,18 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace
       command: ["/usr/local/bin/kubevirt-disk-uploader"]
-      # args: ["--vmname", "example-vm", "--volumename", "datavolumedisk", "--imagedestination", "quay.io/boukhano/example-vm-exported:latest", "--enablevirtsysprep", "false", "--pushtimeout", "120"]
+      # args: ["--vmname", "example-vm", "--volumename", "datavolumedisk", "--imagedestination", "quay.io/boukhano/example-vm-exported:latest", "--pushtimeout", "120"]
       resources:
         requests:
           memory: 3Gi
         limits:
           memory: 5Gi
+      volumeMounts:
+        - name: disk
+          mountPath: /tmp
+  volumes:
+    - name: disk
+      emptyDir: {}
   restartPolicy: Never
 ---
 apiVersion: v1

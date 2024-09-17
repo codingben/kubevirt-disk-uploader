@@ -162,9 +162,6 @@ spec:
   - name: IMAGE_DESTINATION
     description: Destination of the image in container registry
     type: string
-  - name: ENABLE_VIRT_SYSPREP
-    description: Enable or disable preparation of disk image
-    type: string
   - name: PUSH_TIMEOUT
     description: ContainerDisk push timeout in minutes
     type: string
@@ -194,8 +191,6 @@ spec:
     - $(params.VOLUME_NAME)
     - "--imagedestination"
     - $(params.IMAGE_DESTINATION)
-    - "--enablevirtsysprep"
-    - $(params.ENABLE_VIRT_SYSPREP)
     - "--pushtimeout"
     - $(params.PUSH_TIMEOUT)
     computeResources:
@@ -219,9 +214,6 @@ spec:
   - name: IMAGE_DESTINATION
     description: "Destination of the image in container registry"
     type: string
-  - name: ENABLE_VIRT_SYSPREP
-    description: "Enable or disable preparation of disk image"
-    type: string
   - name: PUSH_TIMEOUT
     description: "ContainerDisk push timeout in minutes"
     type: string
@@ -241,8 +233,6 @@ spec:
       value: "$(params.VOLUME_NAME)"
     - name: IMAGE_DESTINATION
       value: "$(params.IMAGE_DESTINATION)"
-    - name: ENABLE_VIRT_SYSPREP
-      value: "$(params.ENABLE_VIRT_SYSPREP)"
     - name: PUSH_TIMEOUT
       value: "$(params.PUSH_TIMEOUT)"
   - name: deploy-example-vm-exported
@@ -265,8 +255,6 @@ spec:
     value: datavolumedisk
   - name: IMAGE_DESTINATION
     value: quay.io/boukhano/example-vm-tekton-exported:latest
-  - name: ENABLE_VIRT_SYSPREP
-    value: true
   - name: PUSH_TIMEOUT
     value: 120
   taskRunTemplate:
