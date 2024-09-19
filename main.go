@@ -149,13 +149,10 @@ func pushContainerDisk(image v1.Image, imageDestination string, pushTimeout int)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*time.Duration(pushTimeout))
 	defer cancel()
 
-	userName := os.Getenv("REGISTRY_USERNAME")
-	password := os.Getenv("REGISTRY_PASSWORD")
 	auth := &authn.Basic{
-		Username: userName,
-		Password: password,
+		Username: os.Getenv("ACCESS_KEY_ID"),
+		Password: os.Getenv("SECRET_KEY"),
 	}
-
 	err := crane.Push(image, imageDestination, crane.WithAuth(auth), crane.WithContext(ctx))
 	if err != nil {
 		log.Fatalf("Error pushing image: %v", err)

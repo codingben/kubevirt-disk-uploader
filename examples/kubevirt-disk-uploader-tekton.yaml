@@ -144,8 +144,8 @@ metadata:
   name: kubevirt-disk-uploader-credentials-tekton
 type: Opaque
 data:
-  registryUsername: "<REGISTRY_USERNAME>"
-  registryPassword: "<REGISTRY_PASSWORD>"
+  accessKeyId: "<ACCESS_KEY_ID>"
+  secretKey: "<SECRET_KEY>"
 ---
 apiVersion: tekton.dev/v1
 kind: Task
@@ -169,16 +169,16 @@ spec:
   - name: kubevirt-disk-uploader-step
     image: quay.io/boukhano/kubevirt-disk-uploader:latest
     env:
-    - name: REGISTRY_USERNAME
+    - name: ACCESS_KEY_ID
       valueFrom:
         secretKeyRef:
           name: kubevirt-disk-uploader-credentials-tekton
-          key: registryUsername
-    - name: REGISTRY_PASSWORD
+          key: accessKeyId
+    - name: SECRET_KEY
       valueFrom:
         secretKeyRef:
           name: kubevirt-disk-uploader-credentials-tekton
-          key: registryPassword
+          key: secretKey
     - name: VM_NAMESPACE
       valueFrom:
         fieldRef:
