@@ -14,7 +14,7 @@ import (
 	kubecli "kubevirt.io/client-go/kubecli"
 )
 
-func CreateVirtualMachineExportSecret(client kubecli.KubevirtClient, vmNamespace, vmName string) error {
+func CreateVirtualMachineExportSecret(client kubecli.KubevirtClient, namespace, name string) error {
 	length := 20
 	token, err := GenerateSecureRandomString(length)
 	if err != nil {
@@ -23,8 +23,8 @@ func CreateVirtualMachineExportSecret(client kubecli.KubevirtClient, vmNamespace
 
 	v1Secret := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      vmName,
-			Namespace: vmNamespace,
+			Name:      name,
+			Namespace: namespace,
 		},
 		StringData: map[string]string{
 			"token": token,
@@ -35,19 +35,19 @@ func CreateVirtualMachineExportSecret(client kubecli.KubevirtClient, vmNamespace
 		return err
 	}
 
-	_, err = client.CoreV1().Secrets(vmNamespace).Create(context.Background(), v1Secret, metav1.CreateOptions{})
+	_, err = client.CoreV1().Secrets(namespace).Create(context.Background(), v1Secret, metav1.CreateOptions{})
 	return err
 }
 
-func GetTokenFromVirtualMachineExportSecret(client kubecli.KubevirtClient, vmNamespace, vmName string) (string, error) {
-	secret, err := client.CoreV1().Secrets(vmNamespace).Get(context.Background(), vmName, metav1.GetOptions{})
+func GetTokenFromVirtualMachineExportSecret(client kubecli.KubevirtClient, namespace, name string) (string, error) {
+	secret, err := client.CoreV1().Secrets(namespace).Get(context.Background(), name, metav1.GetOptions{})
 	if err != nil {
 		return "", err
 	}
 
 	data := secret.Data["token"]
 	if len(data) == 0 {
-		return "", fmt.Errorf("failed to get export token from '%s/%s'", vmNamespace, vmName)
+		return "", fmt.Errorf("failed to get export token from '%s/%s'", namespace, name)
 	}
 	return string(data), nil
 }

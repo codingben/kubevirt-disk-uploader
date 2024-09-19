@@ -20,35 +20,53 @@ const (
 	kvExportTokenHeader string = "x-kubevirt-export-token"
 )
 
-func run(client kubecli.KubevirtClient, vmNamespace, vmName, volumeName, imageDestination string, pushTimeout int) error {
-	log.Printf("Creating a new Secret '%s/%s' object...", vmNamespace, vmName)
+type RunOptions struct {
+	client                kubecli.KubevirtClient
+	exportSourceKind      string
+	exportSourceNamespace string
+	exportSourceName      string
+	volumeName            string
+	imageDestination      string
+	pushTimeout           int
+}
 
-	if err := secrets.CreateVirtualMachineExportSecret(client, vmNamespace, vmName); err != nil {
+func run(opts RunOptions) error {
+	client := opts.client
+	kind := opts.exportSourceKind
+	name := opts.exportSourceName
+	namespace := opts.exportSourceNamespace
+	volumeName := opts.volumeName
+	imageDestination := opts.imageDestination
+	imagePushTimeout := opts.pushTimeout
+
+	log.Printf("Creating a new Secret '%s/%s' object...", namespace, name)
+
+	if err := secrets.CreateVirtualMachineExportSecret(client, namespace, name); err != nil {
 		return err
 	}
 
-	log.Printf("Creating a new VirtualMachineExport '%s/%s' object...", vmNamespace, vmName)
+	log.Printf("Creating a new VirtualMachineExport '%s/%s' object...", namespace, name)
 
-	if err := vmexport.CreateVirtualMachineExport(client, vmNamespace, vmName); err != nil {
+	if err := vmexport.CreateVirtualMachineExport(client, kind, namespace, name); err != nil {
 		return err
 	}
 
 	log.Println("Waiting for VirtualMachineExport status to be ready...")
 
-	if err := vmexport.WaitUntilVirtualMachineExportReady(client, vmNamespace, vmName); err != nil {
+	if err := vmexport.WaitUntilVirtualMachineExportReady(client, namespace, name); err != nil {
 		return err
 	}
 
 	log.Println("Getting raw disk URL from the VirtualMachineExport object status...")
 
-	rawDiskUrl, err := vmexport.GetRawDiskUrlFromVolumes(client, vmNamespace, vmName, volumeName)
+	rawDiskUrl, err := vmexport.GetRawDiskUrlFromVolumes(client, namespace, name, volumeName)
 	if err != nil {
 		return err
 	}
 
 	log.Println("Creating TLS certificate file from the VirtualMachineExport object status...")
 
-	certificateData, err := certificate.GetCertificateFromVirtualMachineExport(client, vmNamespace, vmName)
+	certificateData, err := certificate.GetCertificateFromVirtualMachineExport(client, namespace, name)
 	if err != nil {
 		return err
 	}
@@ -59,7 +77,7 @@ func run(client kubecli.KubevirtClient, vmNamespace, vmName, volumeName, imageDe
 
 	log.Println("Getting export token from the Secret object...")
 
-	kvExportToken, err := secrets.GetTokenFromVirtualMachineExportSecret(client, vmNamespace, vmName)
+	kvExportToken, err := secrets.GetTokenFromVirtualMachineExportSecret(client, namespace, name)
 	if err != nil {
 		return err
 	}
@@ -79,7 +97,7 @@ func run(client kubecli.KubevirtClient, vmNamespace, vmName, volumeName, imageDe
 
 	log.Println("Pushing new container image to the container registry...")
 
-	if err := image.Push(containerImage, imageDestination, pushTimeout); err != nil {
+	if err := image.Push(containerImage, imageDestination, imagePushTimeout); err != nil {
 		return err
 	}
 
@@ -88,12 +106,7 @@ func run(client kubecli.KubevirtClient, vmNamespace, vmName, volumeName, imageDe
 }
 
 func main() {
-	var vmNamespace string
-	var vmName string
-	var volumeName string
-	var imageDestination string
-	var pushTimeout int
-
+	var opts RunOptions
 	var command = &cobra.Command{
 		Use:   "kubevirt-disk-uploader",
 		Short: "Extracts disk and uploads it to a container registry",
@@ -102,24 +115,27 @@ func main() {
 			if err != nil {
 				log.Panicln(err)
 			}
+			opts.client = client
 
 			namespace := os.Getenv("POD_NAMESPACE")
 			if namespace != "" {
-				vmNamespace = namespace
+				opts.exportSourceNamespace = namespace
 			}
 
-			if err := run(client, namespace, vmName, volumeName, imageDestination, pushTimeout); err != nil {
+			if err := run(opts); err != nil {
 				log.Panicln(err)
 			}
 		},
 	}
 
-	command.Flags().StringVar(&vmNamespace, "vmnamespace", "", "namespace of the virtual machine")
-	command.Flags().StringVar(&vmName, "vmname", "", "name of the virtual machine")
-	command.Flags().StringVar(&volumeName, "volumename", "", "volume name of the virtual machine")
-	command.Flags().StringVar(&imageDestination, "imagedestination", "", "destination of the image in container registry")
-	command.Flags().IntVar(&pushTimeout, "pushtimeout", 60, "containerdisk push timeout in minutes")
-	command.MarkFlagRequired("vmname")
+	command.Flags().StringVar(&opts.exportSourceKind, "export-source-kind", "", "specify the export source kind (vm, vmsnapshot, pvc)")
+	command.Flags().StringVar(&opts.exportSourceNamespace, "export-source-namespace", "", "namespace of the export source")
+	command.Flags().StringVar(&opts.exportSourceName, "export-source-name", "", "name of the export source")
+	command.Flags().StringVar(&opts.volumeName, "volumename", "", "name of the volume (if source kind is 'pvc', then volume name is equal to source name)")
+	command.Flags().StringVar(&opts.imageDestination, "imagedestination", "", "destination of the image in container registry")
+	command.Flags().IntVar(&opts.pushTimeout, "pushtimeout", 60, "push timeout of container disk to registry")
+	command.MarkFlagRequired("export-source-kind")
+	command.MarkFlagRequired("export-source-name")
 	command.MarkFlagRequired("volumename")
 	command.MarkFlagRequired("imagedestination")
 

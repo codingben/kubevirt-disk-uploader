@@ -9,8 +9,8 @@ import (
 	kubecli "kubevirt.io/client-go/kubecli"
 )
 
-func GetCertificateFromVirtualMachineExport(client kubecli.KubevirtClient, vmNamespace, vmName string) (string, error) {
-	vmExport, err := client.VirtualMachineExport(vmNamespace).Get(context.Background(), vmName, metav1.GetOptions{})
+func GetCertificateFromVirtualMachineExport(client kubecli.KubevirtClient, namespace, name string) (string, error) {
+	vmExport, err := client.VirtualMachineExport(namespace).Get(context.Background(), name, metav1.GetOptions{})
 	if err != nil {
 		return "", err
 	}

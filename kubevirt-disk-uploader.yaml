@@ -61,7 +61,7 @@ spec:
             fieldRef:
               fieldPath: metadata.name
       command: ["/usr/local/bin/kubevirt-disk-uploader"]
-      # args: ["--vmname", "example-vm", "--volumename", "example-dv", "--imagedestination", "quay.io/boukhano/example-vm-exported:latest", "--pushtimeout", "120"]
+      # args: ["--export-source-kind", "vm", "--export-source-name", "example-vm", "--volumename", "example-dv", "--imagedestination", "quay.io/boukhano/example-vm-exported:latest", "--pushtimeout", "120"]
       resources:
         requests:
           memory: 3Gi
