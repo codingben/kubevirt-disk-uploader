@@ -156,11 +156,14 @@ metadata:
   name: kubevirt-disk-uploader-task
 spec:
   params:
-  - name: POD_NAME
-    description: The name of the virtual machine
+  - name: EXPORT_SOURCE_KIND
+    description: The name of the export source kind
+    type: string
+  - name: EXPORT_SOURCE_NAME
+    description: The name of the export source
     type: string
   - name: VOLUME_NAME
-    description: The volume name of the virtual machine
+    description: The volume name (If source kind is PVC, then volume name is equal to source name)
     type: string
   - name: IMAGE_DESTINATION
     description: Destination of the image in container registry
@@ -192,8 +195,10 @@ spec:
           fieldPath: metadata.name
     command: ["/usr/local/bin/kubevirt-disk-uploader"]
     args:
-    - "--vmname"
-    - $(params.POD_NAME)
+    - "--export-source-kind"
+    - $(params.EXPORT_SOURCE_KIND)
+    - "--export-source-name"
+    - $(params.EXPORT_SOURCE_NAME)
     - "--volumename"
     - $(params.VOLUME_NAME)
     - "--imagedestination"
@@ -212,17 +217,20 @@ metadata:
   name: kubevirt-disk-uploader-pipeline
 spec:
   params:
-  - name: POD_NAME
-    description: "Name of the virtual machine"
+  - name: EXPORT_SOURCE_KIND
+    description: "Kind of the export source"
+    type: string
+  - name: EXPORT_SOURCE_NAME
+    description: "Name of the export source"
     type: string
   - name: VOLUME_NAME
-    description: "Volume name of the virtual machine"
+    description: "Volume name (If source kind is PVC, then volume name is equal to source name)"
     type: string
   - name: IMAGE_DESTINATION
     description: "Destination of the image in container registry"
     type: string
   - name: PUSH_TIMEOUT
-    description: "ContainerDisk push timeout in minutes"
+    description: "Push timeout of container disk to registry"
     type: string
   tasks:
   - name: deploy-example-vm
@@ -234,8 +242,10 @@ spec:
     runAfter:
       - deploy-example-vm
     params:
-    - name: POD_NAME
-      value: "$(params.POD_NAME)"
+    - name: EXPORT_SOURCE_KIND
+      value: "$(params.EXPORT_SOURCE_KIND)"
+    - name: EXPORT_SOURCE_NAME
+      value: "$(params.EXPORT_SOURCE_NAME)"
     - name: VOLUME_NAME
       value: "$(params.VOLUME_NAME)"
     - name: IMAGE_DESTINATION
@@ -256,7 +266,9 @@ spec:
   pipelineRef:
     name: kubevirt-disk-uploader-pipeline
   params:
-  - name: POD_NAME
+  - name: EXPORT_SOURCE_KIND
+    value: vm
+  - name: EXPORT_SOURCE_NAME
     value: example-vm-tekton
   - name: VOLUME_NAME
     value: example-dv-tekton

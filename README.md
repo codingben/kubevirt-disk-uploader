@@ -4,27 +4,39 @@ Extracts disk and uploads it to a container registry.
 
 ## About
 
-A tool designed to automate the extraction of disks from KubeVirt Virtual Machines, package them into [Container Disks](https://kubevirt.io/user-guide/virtual_machines/disks_and_volumes/#containerdisk), and upload them to the Container Registry.
+A tool designed to automate the extraction of disk, rebuild as [Container Disk](https://kubevirt.io/user-guide/virtual_machines/disks_and_volumes/#containerdisk) and upload to the Container Registry.
 
-## Workflow
+## Usage
 
-KubeVirt Disk Uploader -> Download VM Disk -> Build New Container Disk -> Push To Container Registry
+These are the supported export sources:
 
-## Installation
+- VirtualMachine (VM)
+- VirtualMachineSnapshot (VM Snapshot)
+- PersistentVolumeClaim (PVC)
+
+Data from the source can be exported only when it is not used.
 
 **Prerequisites**
 
-1. Ensure Virtual Machine (VM) is powered off. Data from VM can be exported only when it is not used.
-2. Modify [kubevirt-disk-uploader](https://github.com/codingben/kubevirt-disk-uploader/blob/main/kubevirt-disk-uploader.yaml#L58) arguments (VM Namespace, VM Name, Volume Name, Image Destination, Enable or Disable System Preparation and Push Timeout).
-3. Modify [kubevirt-disk-uploader-credentials](https://github.com/codingben/kubevirt-disk-uploader/blob/main/kubevirt-disk-uploader.yaml#L65-L74) of the external container registry (Username, Password and Hostname).
+- Modify [kubevirt-disk-uploader](https://github.com/codingben/kubevirt-disk-uploader/blob/main/kubevirt-disk-uploader.yaml#L58) arguments.
+- Modify [kubevirt-disk-uploader-credentials](https://github.com/codingben/kubevirt-disk-uploader/blob/main/kubevirt-disk-uploader.yaml#L65-L74) of the external container registry.
 
-Deploy `kubevirt-disk-uploader` within the same namespace as the Virtual Machine (VM):
+**Parameters**
+
+- **Export Source Kind**: Specify the export source kind (`vm`, `vmsnapshot`, `pvc`).
+- **Export Source Namespace**: The namespace of the export source.
+- **Export Source Name**: The name of the export source.
+- **Volume Name**:  The name of the volume to export data.
+- **Image Destination**: Destination of the image in container registry (`$HOST/$OWNER/$REPO:$TAG`).
+- **Push Timeout**: The push timeout of container disk to registry.
+
+Deploy `kubevirt-disk-uploader` within the same namespace of Export Source (VM, VM Snapshot, PVC):
 
 ```
 kubectl apply -f kubevirt-disk-uploader.yaml -n $POD_NAMESPACE
 ```
 
-**Note**: If both `POD_NAMESPACE` and `--vmnamespace` argument are set, `POD_NAMESPACE` will be used.
+Setting of environment variable `POD_NAMESPACE` overrides the value in `--export-source-namespace` if passed.
 
 ## KubeVirt Documentation
 
