@@ -39,16 +39,16 @@ spec:
       image: quay.io/boukhano/kubevirt-disk-uploader:latest
       imagePullPolicy: Always
       env:
-        - name: REGISTRY_USERNAME
+        - name: ACCESS_KEY_ID
           valueFrom:
             secretKeyRef:
               name: kubevirt-disk-uploader-credentials
-              key: registryUsername
-        - name: REGISTRY_PASSWORD
+              key: accessKeyId
+        - name: SECRET_KEY
           valueFrom:
             secretKeyRef:
               name: kubevirt-disk-uploader-credentials
-              key: registryPassword
+              key: secretKey
         - name: VM_NAMESPACE
           valueFrom:
             fieldRef:
@@ -74,5 +74,5 @@ metadata:
   name: kubevirt-disk-uploader-credentials
 type: Opaque
 data:
-  registryUsername: "<REGISTRY_USERNAME>"
-  registryPassword: "<REGISTRY_PASSWORD>"
+  accessKeyId: "<ACCESS_KEY_ID>"
+  secretKey: "<SECRET_KEY>"

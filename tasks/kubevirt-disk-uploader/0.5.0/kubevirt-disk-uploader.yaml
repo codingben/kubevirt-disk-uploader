@@ -32,16 +32,16 @@ spec:
   - name: kubevirt-disk-uploader-step
     image: quay.io/boukhano/kubevirt-disk-uploader:v0.5.0
     env:
-    - name: REGISTRY_USERNAME
+    - name: ACCESS_KEY_ID
       valueFrom:
         secretKeyRef:
           name: kubevirt-disk-uploader-credentials-tekton
-          key: registryUsername
-    - name: REGISTRY_PASSWORD
+          key: accessKeyId
+    - name: SECRET_KEY
       valueFrom:
         secretKeyRef:
           name: kubevirt-disk-uploader-credentials-tekton
-          key: registryPassword
+          key: secretKey
     - name: VM_NAMESPACE
       valueFrom:
         fieldRef:

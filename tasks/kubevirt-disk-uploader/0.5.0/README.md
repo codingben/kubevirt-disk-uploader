@@ -33,8 +33,8 @@ metadata:
   name: kubevirt-disk-uploader-credentials-tekton
 type: Opaque
 data:
-  registryUsername: "<REGISTRY_USERNAME>"
-  registryPassword: "<REGISTRY_PASSWORD>"
+  accessKeyId: "<ACCESS_KEY_ID>"
+  secretKey: "<SECRET_KEY>"
 ```
 
 TaskRun:
