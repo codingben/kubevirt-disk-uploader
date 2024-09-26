@@ -9,7 +9,7 @@ spec:
   - name: VM_NAME
     value: example-vm-tekton
   - name: VOLUME_NAME
-    value: datavolumedisk
+    value: example-dv-tekton
   - name: IMAGE_DESTINATION
     value: quay.io/boukhano/example-vm-tekton-exported:latest
   - name: PUSH_TIMEOUT
