@@ -15,6 +15,9 @@ rules:
 - apiGroups: [""]
   resources: ["secrets"]
   verbs: ["get", "create"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -53,8 +56,12 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
+        - name: VM_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
       command: ["/usr/local/bin/kubevirt-disk-uploader"]
-      # args: ["--vmname", "example-vm", "--volumename", "datavolumedisk", "--imagedestination", "quay.io/boukhano/example-vm-exported:latest", "--pushtimeout", "120"]
+      # args: ["--vmname", "example-vm", "--volumename", "example-dv", "--imagedestination", "quay.io/boukhano/example-vm-exported:latest", "--pushtimeout", "120"]
       resources:
         requests:
           memory: 3Gi
