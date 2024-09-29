@@ -6,7 +6,7 @@ spec:
   taskRef:
     name: kubevirt-disk-uploader-task
   params:
-  - name: VM_NAME
+  - name: POD_NAME
     value: example-vm-tekton
   - name: VOLUME_NAME
     value: datavolumedisk

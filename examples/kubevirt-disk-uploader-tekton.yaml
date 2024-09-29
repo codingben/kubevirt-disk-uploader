@@ -153,7 +153,7 @@ metadata:
   name: kubevirt-disk-uploader-task
 spec:
   params:
-  - name: VM_NAME
+  - name: POD_NAME
     description: The name of the virtual machine
     type: string
   - name: VOLUME_NAME
@@ -179,14 +179,14 @@ spec:
         secretKeyRef:
           name: kubevirt-disk-uploader-credentials-tekton
           key: secretKey
-    - name: VM_NAMESPACE
+    - name: POD_NAMESPACE
       valueFrom:
         fieldRef:
           fieldPath: metadata.namespace
     command: ["/usr/local/bin/kubevirt-disk-uploader"]
     args:
     - "--vmname"
-    - $(params.VM_NAME)
+    - $(params.POD_NAME)
     - "--volumename"
     - $(params.VOLUME_NAME)
     - "--imagedestination"
@@ -205,7 +205,7 @@ metadata:
   name: kubevirt-disk-uploader-pipeline
 spec:
   params:
-  - name: VM_NAME
+  - name: POD_NAME
     description: "Name of the virtual machine"
     type: string
   - name: VOLUME_NAME
@@ -227,8 +227,8 @@ spec:
     runAfter:
       - deploy-example-vm
     params:
-    - name: VM_NAME
-      value: "$(params.VM_NAME)"
+    - name: POD_NAME
+      value: "$(params.POD_NAME)"
     - name: VOLUME_NAME
       value: "$(params.VOLUME_NAME)"
     - name: IMAGE_DESTINATION
@@ -249,7 +249,7 @@ spec:
   pipelineRef:
     name: kubevirt-disk-uploader-pipeline
   params:
-  - name: VM_NAME
+  - name: POD_NAME
     value: example-vm-tekton
   - name: VOLUME_NAME
     value: datavolumedisk

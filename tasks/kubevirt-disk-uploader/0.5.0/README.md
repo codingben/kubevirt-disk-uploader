@@ -14,7 +14,7 @@ kubectl apply -f https://raw.githubusercontent.com/codingben/kubevirt-disk-uploa
 
 # Parameters
 
-- **VM_NAME**: The name of the virtual machine
+- **POD_NAME**: The name of the virtual machine
 - **VOLUME_NAME**: The volume name of the virtual machine
 - **IMAGE_DESTINATION**: Destination of the image in container registry
 - **PUSH_TIMEOUT**: ContainerDisk push timeout in minutes
@@ -48,8 +48,8 @@ spec:
   taskRef:
     name: kubevirt-disk-uploader-task
   params:
-  - name: VM_NAME
-    value: <VM_NAME_VALUE>
+  - name: POD_NAME
+    value: <POD_NAME_VALUE>
   - name: VOLUME_NAME
     value: <VOLUME_NAME_VALUE>
   - name: IMAGE_DESTINATION

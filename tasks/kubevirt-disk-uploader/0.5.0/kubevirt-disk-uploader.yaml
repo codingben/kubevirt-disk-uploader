@@ -16,7 +16,7 @@ spec:
     Automates the extraction of disk and uploads it to a container registry,
     to be used in multiple Kubernetes clusters.
   params:
-  - name: VM_NAME
+  - name: POD_NAME
     description: The name of the virtual machine
     type: string
   - name: VOLUME_NAME
@@ -42,14 +42,14 @@ spec:
         secretKeyRef:
           name: kubevirt-disk-uploader-credentials-tekton
           key: secretKey
-    - name: VM_NAMESPACE
+    - name: POD_NAMESPACE
       valueFrom:
         fieldRef:
           fieldPath: metadata.namespace
     command: ["/usr/local/bin/kubevirt-disk-uploader"]
     args:
     - "--vmname"
-    - $(params.VM_NAME)
+    - $(params.POD_NAME)
     - "--volumename"
     - $(params.VOLUME_NAME)
     - "--imagedestination"
