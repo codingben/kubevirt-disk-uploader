@@ -21,10 +21,10 @@ KubeVirt Disk Uploader -> Download VM Disk -> Build New Container Disk -> Push T
 Deploy `kubevirt-disk-uploader` within the same namespace as the Virtual Machine (VM):
 
 ```
-kubectl apply -f kubevirt-disk-uploader.yaml -n $VM_NAMESPACE
+kubectl apply -f kubevirt-disk-uploader.yaml -n $POD_NAMESPACE
 ```
 
-**Note**: If both `VM_NAMESPACE` and `--vmnamespace` argument are set, `VM_NAMESPACE` will be used.
+**Note**: If both `POD_NAMESPACE` and `--vmnamespace` argument are set, `POD_NAMESPACE` will be used.
 
 ## KubeVirt Documentation
 

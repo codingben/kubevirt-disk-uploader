@@ -3,8 +3,9 @@ FROM golang:1.22 as builder
 WORKDIR /app
 COPY go.mod go.sum ./
 COPY vendor/ ./vendor
-COPY main.go .
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o kubevirt-disk-uploader .
+COPY cmd/ ./cmd
+COPY pkg/ ./pkg
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o kubevirt-disk-uploader ./cmd
 
 FROM quay.io/fedora/fedora-minimal:39
 
