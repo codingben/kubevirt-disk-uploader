@@ -2,6 +2,8 @@
 
 Extracts disk and uploads it to a container registry.
 
+**Note**: This repository is no longer maintained. Please refer to [kubevirt/kubevirt-tekton-tasks](https://github.com/kubevirt/kubevirt-tekton-tasks) to use this functionality.
+
 ## About
 
 A tool designed to automate the extraction of disk, rebuild as [Container Disk](https://kubevirt.io/user-guide/virtual_machines/disks_and_volumes/#containerdisk) and upload to the Container Registry.
